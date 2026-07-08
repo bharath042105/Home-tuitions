@@ -1,0 +1,38 @@
+# --- Node / pnpm (web/) ---
+node_modules/
+.next/
+out/
+dist/
+.turbo/
+*.tsbuildinfo
+npm-debug.log*
+pnpm-debug.log*
+
+# --- Java / Maven (backend/) ---
+target/
+*.class
+*.jar
+!.mvn/wrapper/maven-wrapper.jar
+
+# --- Flutter / Dart (mobile/) ---
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+build/
+android/.gradle/
+android/local.properties
+**/ios/Flutter/.last_build_id
+
+# --- IDEs / editors ---
+.idea/
+.vscode/
+*.iml
+
+# --- Env / secrets ---
+.env
+.env.local
+.env.*.local
+
+# --- OS noise ---
+.DS_Store
+Thumbs.db

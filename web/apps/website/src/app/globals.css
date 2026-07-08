@@ -1,0 +1,45 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light dark;
+
+  /* Static fallback = the "indigo-coral" preset (see
+     web/packages/shared/src/design/tokens.ts). Renders correctly on first paint before
+     any JS runs; ThemeConfigProvider overrides these at runtime if a different preset
+     was previously chosen - see that file for the accepted FOUC tradeoff in that case. */
+  --color-brand-50: 238 242 255;
+  --color-brand-100: 224 231 255;
+  --color-brand-300: 165 180 252;
+  --color-brand-500: 79 70 229;
+  --color-brand-600: 67 56 202;
+  --color-brand-700: 55 48 163;
+
+  --color-accent-50: 255 241 242;
+  --color-accent-100: 255 228 230;
+  --color-accent-300: 253 164 175;
+  --color-accent-500: 251 113 133;
+  --color-accent-600: 244 63 94;
+  --color-accent-700: 225 29 72;
+
+  --color-success-50: 240 253 244;
+  --color-success-500: 22 163 74;
+  --color-success-700: 21 128 61;
+
+  --color-warning-50: 255 251 235;
+  --color-warning-500: 217 119 6;
+  --color-warning-700: 180 83 9;
+
+  --color-danger-50: 254 242 242;
+  --color-danger-500: 220 38 38;
+  --color-danger-700: 185 28 28;
+
+  --color-info-50: 236 254 255;
+  --color-info-500: 8 145 178;
+  --color-info-700: 14 116 144;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+}

@@ -1,0 +1,70 @@
+name: hometuitions_mobile
+description: Home Tuitions - online & offline tutor marketplace mobile app.
+publish_to: "none"
+version: 0.1.0
+
+environment:
+  sdk: ">=3.5.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # State management
+  flutter_riverpod: ^2.6.1
+
+  # Routing
+  go_router: ^14.3.0
+
+  # Networking
+  dio: ^5.7.0
+
+  # Secure on-device storage for the refresh token + a persistent device id
+  # (docs/phase2/03-low-level-design.md  3 - refresh tokens are bound to a deviceId)
+  flutter_secure_storage: ^9.2.2
+  uuid: ^4.5.1
+
+  # Modeling / codegen
+  freezed_annotation: ^2.4.4
+  json_annotation: ^4.9.0
+
+  # UI utilities
+  flutter_hooks: ^0.20.5
+  hooks_riverpod: ^2.6.1
+
+  # Cloud integrations (added now per spec; wired up when their phases start -
+  # see docs/phase1/00-mvp-scope.md for sequencing)
+  firebase_core: ^3.6.0
+  firebase_messaging: ^15.1.3
+  # agora_rtc_engine temporarily removed: unused (Phase 11 Online Classroom hasn't
+  # started - deferred per the user). Its transitive iris_method_channel plugin bundles
+  # its own buildscript pinned to Android Gradle Plugin 7.1.2, which fails to apply
+  # alongside the modern AGP `flutter create` generates for this Flutter version
+  # ("'kotlin-android' plugin requires one of the Android Gradle plugins"). Re-add when
+  # Phase 11 starts; may need a newer agora_rtc_engine release or a Gradle resolution
+  # strategy override to force a consistent AGP/Kotlin version across all subprojects.
+
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+  build_runner: ^2.4.13
+  freezed: ^2.5.7
+  json_serializable: ^6.8.0
+  # riverpod_generator/riverpod_annotation removed: not actually used anywhere in this
+  # codebase (all providers are hand-written Provider/StateProvider/NotifierProvider,
+  # never @riverpod-annotated) - dead pins from the Phase 3 scaffold. Removing them also
+  # drops riverpod_analyzer_utils -> custom_lint_core -> analyzer_plugin, whose pinned
+  # version straddled analyzer's Element/Element2 API split incompatibly with every
+  # analyzer version actually resolvable alongside freezed/build_runner/json_serializable.
+  # custom_lint/riverpod_lint were removed for the same underlying reason (unused static
+  # analysis tooling pulling the same broken analyzer_plugin version).
+
+  # Test doubles for AuthRepository/RefreshTokenStorage in provider/widget tests
+  mocktail: ^1.0.4
+
+flutter:
+  uses-material-design: true

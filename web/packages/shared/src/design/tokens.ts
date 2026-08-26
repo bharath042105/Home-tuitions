@@ -144,17 +144,40 @@ const vidyaRoyal: ThemeTokens = {
   radius: { sm: "8px", md: "12px", lg: "20px" },
 };
 
+const violetNebula: ThemeTokens = {
+  name: "violet-nebula",
+  brand: {
+    50: "#F5F3FF",
+    100: "#EDE9FE",
+    300: "#C7D2FE",
+    500: "#8B5CF6",
+    600: "#7C3AED",
+    700: "#6D28D9",
+  },
+  accent: {
+    50: "#ECFEFF",
+    100: "#CFFAFE",
+    300: "#67E8F9",
+    500: "#06B6D4",
+    600: "#0891B2",
+    700: "#0E7490",
+  },
+  semantic: homeTuitionsBlue.semantic,
+  radius: { sm: "8px", md: "14px", lg: "24px" },
+};
+
 export const THEME_PRESETS: Record<string, ThemeTokens> = {
   "indigo-coral": indigoCoral,
   "hometuitions-blue": homeTuitionsBlue,
   "emerald-campus": emeraldCampus,
   "vidya-royal": vidyaRoyal,
+  "violet-nebula": violetNebula,
 };
 
-export const DEFAULT_THEME_NAME = "vidya-royal";
+export const DEFAULT_THEME_NAME = "violet-nebula";
 
 export function resolveThemeTokens(name: string | null | undefined): ThemeTokens {
-  return THEME_PRESETS[name ?? DEFAULT_THEME_NAME] ?? indigoCoral;
+  return THEME_PRESETS[name ?? DEFAULT_THEME_NAME] ?? THEME_PRESETS[DEFAULT_THEME_NAME] ?? vidyaRoyal;
 }
 
 /** Flattens a ThemeTokens into a flat CSS custom-property map (`--color-brand-500`, etc.)

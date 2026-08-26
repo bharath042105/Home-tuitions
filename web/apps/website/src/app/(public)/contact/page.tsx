@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { Mail, MapPin, Phone, Clock, Send, CheckCircle2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { SiteHeader } from "@/components/features/marketing/SiteHeader";
 import { SiteFooter } from "@/components/features/marketing/SiteFooter";
+import { leadsApi } from "@/lib/api/leads";
 
 export default function ContactPage() {
   // Form State
@@ -13,9 +15,14 @@ export default function ContactPage() {
   const [phone, setPhone] = useState("");
   const [message, setMessage] = useState("");
 
-  const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
+
+  const submitMutation = useMutation({
+    mutationFn: leadsApi.submitContactMessage,
+    onSuccess: () => setSubmitted(true),
+    onError: () => setError("Something went wrong sending your message - please try again."),
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,14 +31,8 @@ export default function ContactPage() {
       return;
     }
 
-    setLoading(true);
     setError("");
-
-    // Simulate API Call
-    setTimeout(() => {
-      setLoading(false);
-      setSubmitted(true);
-    }, 1200);
+    submitMutation.mutate({ name, phone, email: email.trim() || undefined, message });
   };
 
   return (
@@ -147,7 +148,7 @@ export default function ContactPage() {
                     />
                   </div>
 
-                  <Button type="submit" loading={loading} className="font-bold self-start mt-2 h-10 px-6">
+                  <Button type="submit" loading={submitMutation.isPending} className="font-bold self-start mt-2 h-10 px-6">
                     Send Message
                     <Send size={15} />
                   </Button>

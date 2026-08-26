@@ -11,6 +11,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.validation.FieldError;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -94,6 +95,15 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleInvalidWebhookSignature(InvalidWebhookSignatureException ex) {
         return ResponseEntity.badRequest().body(
                 new ErrorResponse("INVALID_WEBHOOK_SIGNATURE", ex.getMessage(), null, Instant.now()));
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ErrorResponse> handleMethodNotSupported(HttpRequestMethodNotSupportedException ex) {
+        // e.g. a browser GET on a POST-only endpoint like /api/v1/leads/tuition-inquiries -
+        // without this handler the catch-all below turned this into a confusing generic
+        // 500 (which can look like a CORS failure in the browser) instead of a clear 405.
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(
+                new ErrorResponse("METHOD_NOT_ALLOWED", ex.getMessage(), null, Instant.now()));
     }
 
     @ExceptionHandler(RateLimitExceededException.class)

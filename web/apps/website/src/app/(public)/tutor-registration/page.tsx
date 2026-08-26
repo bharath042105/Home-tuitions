@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useMutation } from "@tanstack/react-query";
 import {
   ChevronDown,
   CheckCircle2,
@@ -23,6 +24,7 @@ import {
 import { Button } from "@/components/ui/Button";
 import { SiteHeader } from "@/components/features/marketing/SiteHeader";
 import { SiteFooter } from "@/components/features/marketing/SiteFooter";
+import { leadsApi } from "@/lib/api/leads";
 
 const STEP_HEADERS = [
   { id: 1, title: "Step 1 : Personal Details" },
@@ -110,6 +112,11 @@ export default function TutorRegistrationPage() {
   // Error States
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  const submitMutation = useMutation({
+    mutationFn: leadsApi.submitTutorApplication,
+    onSuccess: () => setIsSubmitted(true),
+  });
+
   const validateStep = (step: number) => {
     const stepErrors: Record<string, string> = {};
 
@@ -157,7 +164,34 @@ export default function TutorRegistrationPage() {
   const handleSubmitRegistration = (e: React.FormEvent) => {
     e.preventDefault();
     if (validateStep(5)) {
-      setIsSubmitted(true);
+      submitMutation.mutate({
+        name,
+        fatherName: fatherName.trim() || undefined,
+        qualification,
+        college,
+        percentage,
+        passYear,
+        interCollege: interCollege.trim() || undefined,
+        interPercentage: interPercentage.trim() || undefined,
+        schoolName: schoolName.trim() || undefined,
+        schoolPercentage: schoolPercentage.trim() || undefined,
+        localities,
+        commuteDistance,
+        grades: selectedGrades,
+        subjects: selectedSubjects,
+        boards: selectedBoards,
+        medium,
+        mode,
+        mobile,
+        whatsapp,
+        alternativePhone: alternativePhone.trim() || undefined,
+        email,
+        occupation,
+        experience,
+        expectedRate,
+        timings,
+        bio: bio.trim() || undefined,
+      });
     }
   };
 
@@ -802,11 +836,21 @@ export default function TutorRegistrationPage() {
                           <span className="text-[10px] text-neutral-450 flex items-center gap-1">
                             <Lock size={12} /> Encrypted, background check secured upload channel.
                           </span>
-                          <Button type="submit" className="px-6 font-bold shadow-md shadow-brand-500/10">
+                          <Button
+                            type="submit"
+                            loading={submitMutation.isPending}
+                            className="px-6 font-bold shadow-md shadow-brand-500/10"
+                          >
                             Complete Registration
                             <CheckCircle2 size={16} />
                           </Button>
                         </div>
+
+                        {submitMutation.isError && (
+                          <p role="alert" className="text-sm text-danger-500">
+                            Something went wrong submitting your application - please try again.
+                          </p>
+                        )}
                       </form>
                     )}
                   </div>

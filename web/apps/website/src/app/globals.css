@@ -43,3 +43,108 @@
   --radius-md: 12px;
   --radius-lg: 20px;
 }
+
+/* Premium Web UI Custom Utilities */
+
+.glass-morphic {
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(24px) saturate(120%);
+  -webkit-backdrop-filter: blur(24px) saturate(120%);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+.dark .glass-morphic {
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(24px) saturate(120%);
+  -webkit-backdrop-filter: blur(24px) saturate(120%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Smooth Glow Shadows matching themes */
+.glow-shadow-brand {
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.glow-shadow-brand:hover {
+  box-shadow: 0 16px 36px -12px rgb(var(--color-brand-500) / 0.22);
+  border-color: rgb(var(--color-brand-500) / 0.25);
+}
+
+.glow-shadow-accent {
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.glow-shadow-accent:hover {
+  box-shadow: 0 16px 36px -12px rgb(var(--color-accent-500) / 0.22);
+  border-color: rgb(var(--color-accent-500) / 0.25);
+}
+
+.glow-shadow-success {
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.glow-shadow-success:hover {
+  box-shadow: 0 16px 36px -12px rgb(var(--color-success-500) / 0.22);
+  border-color: rgb(var(--color-success-500) / 0.25);
+}
+
+.glow-shadow-warning {
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.glow-shadow-warning:hover {
+  box-shadow: 0 16px 36px -12px rgb(var(--color-warning-500) / 0.22);
+  border-color: rgb(var(--color-warning-500) / 0.25);
+}
+
+/* Animations */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+  100% { transform: translateY(0px); }
+}
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes drift {
+  0% { transform: translate(0px, 0px) scale(1); }
+  33% { transform: translate(30px, -50px) scale(1.1); }
+  66% { transform: translate(-20px, 20px) scale(0.95); }
+  100% { transform: translate(0px, 0px) scale(1); }
+}
+.animate-drift-slow-1 {
+  animation: drift 20s ease-in-out infinite;
+}
+.animate-drift-slow-2 {
+  animation: drift 25s ease-in-out infinite 2s;
+}
+.animate-drift-slow-3 {
+  animation: drift 22s ease-in-out infinite 4s;
+}
+
+/* 3D Visual Effects */
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.hover-3d-card {
+  transform-style: preserve-3d;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s;
+}
+
+.hover-3d-card:hover {
+  transform: perspective(1000px) rotateX(6deg) rotateY(-4deg) translateY(-4px);
+}
+
+.translate-z-20 {
+  transform: translateZ(20px);
+}
+
+.translate-z-30 {
+  transform: translateZ(30px);
+}
+
+.translate-z-40 {
+  transform: translateZ(40px);
+}

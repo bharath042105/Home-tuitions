@@ -88,6 +88,7 @@ public class SecurityConfig {
                     "/api/v1/auth/refresh",
                     "/api/v1/tutors/search/**",
                     "/api/v1/tutors/*/profile",
+                    "/api/v1/leads/**",
                     "/api/v1/webhooks/razorpay",
                     "/ws/**",
                     "/swagger-ui/**", "/v3/api-docs/**",
@@ -96,6 +97,11 @@ public class SecurityConfig {
                 // /api/v1/auth/logout is intentionally NOT in the list above - it reads
                 // the caller's identity from the validated JWT (see AuthController), so it
                 // must go through authentication like any other protected endpoint.
+                // /api/v1/leads/** (LeadController) is public by design - anonymous website
+                // visitors submit tuition inquiries/tutor applications/contact messages
+                // before any account exists; each is @RateLimited per client IP to guard
+                // against spam. /api/v1/admin/leads/** (the read/triage side) is NOT in this
+                // list - it falls under the existing "/api/v1/admin/**" hasRole(ADMIN) rule.
                 // /api/v1/webhooks/razorpay is public by necessity (Razorpay can't hold a
                 // JWT) - it authenticates itself via the X-Razorpay-Signature HMAC header,
                 // verified inside PaymentServiceImpl.handleWebhookEvent before anything else runs.

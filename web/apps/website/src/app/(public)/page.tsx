@@ -19,8 +19,10 @@ import {
   Award
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { ThreeDTilt } from "@/components/ui/ThreeDTilt";
 import { SiteHeader } from "@/components/features/marketing/SiteHeader";
 import { SiteFooter } from "@/components/features/marketing/SiteFooter";
+import { ThreeDInteractiveBackground } from "@/components/features/marketing/ThreeDInteractiveBackground";
 
 // FAQ Data
 const FAQS = [
@@ -125,12 +127,13 @@ export default function HomePage() {
     <div className="min-h-screen bg-white text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100 transition-colors flex flex-col justify-between">
       <SiteHeader />
       <main className="relative overflow-hidden flex-1">
+        <ThreeDInteractiveBackground />
         {/* Glow Mesh Gradients */}
         <div className="pointer-events-none absolute left-0 right-0 top-0 -z-10 flex justify-center overflow-hidden">
           <div className="relative h-[800px] w-[1440px] shrink-0">
-            <div className="absolute -left-20 top-[-100px] h-[500px] w-[500px] rounded-full bg-brand-500/10 blur-[100px] dark:bg-brand-500/5 animate-pulse" />
-            <div className="absolute right-[-50px] top-[-50px] h-[600px] w-[600px] rounded-full bg-accent-500/10 blur-[120px] dark:bg-accent-500/5" />
-            <div className="absolute left-[30%] top-[400px] h-[400px] w-[400px] rounded-full bg-indigo-500/10 blur-[90px] dark:bg-indigo-500/5" />
+            <div className="absolute -left-20 top-[-100px] h-[500px] w-[500px] rounded-full bg-brand-500/10 blur-[100px] dark:bg-brand-500/5 animate-drift-slow-1" />
+            <div className="absolute right-[-50px] top-[-50px] h-[600px] w-[600px] rounded-full bg-accent-500/10 blur-[120px] dark:bg-accent-500/5 animate-drift-slow-2" />
+            <div className="absolute left-[30%] top-[400px] h-[400px] w-[400px] rounded-full bg-brand-500/10 blur-[90px] dark:bg-brand-500/5 animate-drift-slow-3" />
           </div>
         </div>
 
@@ -146,7 +149,7 @@ export default function HomePage() {
                 </div>
                 <h1 className="text-4xl font-extrabold tracking-tight text-neutral-900 dark:text-white sm:text-5xl md:text-6xl leading-[1.1]">
                   Transform Grades with{" "}
-                  <span className="bg-gradient-to-r from-brand-600 to-brand-500 bg-clip-text text-transparent dark:from-brand-400 dark:to-brand-300">
+                  <span className="bg-gradient-to-r from-brand-600 via-brand-500 to-accent-500 bg-clip-text text-transparent dark:from-brand-400 dark:via-brand-300 dark:to-accent-300">
                     Vidya Home Tuitions
                   </span>
                 </h1>
@@ -196,96 +199,98 @@ export default function HomePage() {
               </div>
 
               {/* Right Column: Quick Match Form Card */}
-              <div className="lg:col-span-5 relative">
-                <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-brand-500 to-accent-500 opacity-20 blur-xl dark:opacity-30" />
-                <div className="relative rounded-2xl border border-neutral-200 bg-white/90 p-6 shadow-xl backdrop-blur-md dark:border-neutral-800 dark:bg-neutral-900/90 sm:p-8">
-                  <h3 className="text-xl font-bold text-neutral-900 dark:text-white flex items-center gap-2">
-                    <GraduationCap className="text-brand-500" />
-                    Quick Tutor Matcher
-                  </h3>
-                  <p className="text-xs text-neutral-500 dark:text-neutral-450 mt-1 mb-6">
-                    Fill the preferences below to view matches.
-                  </p>
+              <div className="lg:col-span-5 relative animate-float">
+                <div className="absolute -inset-1.5 rounded-3xl bg-gradient-to-r from-brand-500 to-accent-500 opacity-25 blur-2xl dark:opacity-40" />
+                <ThreeDTilt maxRotation={12} scale={1.03} className="w-full">
+                  <div className="relative rounded-2xl border border-white/40 glass-morphic p-6 shadow-2xl sm:p-8 hover:border-brand-500/35 transition-colors duration-500 preserve-3d">
+                    <h3 className="text-xl font-bold text-neutral-900 dark:text-white flex items-center gap-2 translate-z-30">
+                      <GraduationCap className="text-brand-500 animate-pulse" />
+                      Quick Tutor Matcher
+                    </h3>
+                    <p className="text-xs text-neutral-500 dark:text-neutral-450 mt-1 mb-6 translate-z-20">
+                      Fill the preferences below to view matches.
+                    </p>
 
-                  <form onSubmit={handleQuickMatchSubmit} className="flex flex-col gap-4">
-                    <div>
-                      <label className="block text-xs font-semibold text-neutral-600 dark:text-neutral-400 mb-1.5">
-                        Select Grade / Class
-                      </label>
-                      <select
-                        value={matchClass}
-                        onChange={(e) => setMatchClass(e.target.value)}
-                        required
-                        className="w-full h-10 px-3 rounded-md border border-neutral-200 bg-white text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
-                      >
-                        <option value="">-- Choose Class --</option>
-                        <option value="Nursery-UKG">Nursery to UKG</option>
-                        <option value="Class 1-5">Class 1 to 5</option>
-                        <option value="Class 6-8">Class 6 to 8</option>
-                        <option value="Class 9-10">Class 9 & 10 (Board)</option>
-                        <option value="Class 11-12">Class 11 & 12 (Intermediate)</option>
-                        <option value="IIT-JEE/NEET">IIT-JEE / NEET Prep</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-semibold text-neutral-600 dark:text-neutral-400 mb-1.5">
-                        Target Subject
-                      </label>
-                      <select
-                        value={matchSubject}
-                        onChange={(e) => setMatchSubject(e.target.value)}
-                        required
-                        className="w-full h-10 px-3 rounded-md border border-neutral-200 bg-white text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
-                      >
-                        <option value="">-- Choose Subject --</option>
-                        <option value="Mathematics">Mathematics</option>
-                        <option value="Physics">Physics</option>
-                        <option value="Chemistry">Chemistry</option>
-                        <option value="Biology">Biology</option>
-                        <option value="General Science">General Science</option>
-                        <option value="English">English / Grammar</option>
-                        <option value="Languages">Hindi / Telugu / Sanskrit</option>
-                        <option value="Coding">Coding (Scratch/Python)</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-semibold text-neutral-600 dark:text-neutral-400 mb-1.5">
-                        Tuition Mode
-                      </label>
-                      <div className="grid grid-cols-2 gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setMatchType("HOME")}
-                          className={`h-10 text-xs font-semibold rounded-md border transition-all ${
-                            matchType === "HOME"
-                              ? "border-brand-500 bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-brand-400"
-                              : "border-neutral-200 hover:bg-neutral-50 dark:border-neutral-700 dark:hover:bg-neutral-800"
-                          }`}
+                    <form onSubmit={handleQuickMatchSubmit} className="flex flex-col gap-4 preserve-3d">
+                      <div className="translate-z-20">
+                        <label className="block text-xs font-semibold text-neutral-600 dark:text-neutral-400 mb-1.5">
+                          Select Grade / Class
+                        </label>
+                        <select
+                          value={matchClass}
+                          onChange={(e) => setMatchClass(e.target.value)}
+                          required
+                          className="w-full h-10 px-3 rounded-md border border-neutral-200 bg-white text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white shadow-sm"
                         >
-                          At Home (Offline)
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setMatchType("ONLINE")}
-                          className={`h-10 text-xs font-semibold rounded-md border transition-all ${
-                            matchType === "ONLINE"
-                              ? "border-brand-500 bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-brand-400"
-                              : "border-neutral-200 hover:bg-neutral-50 dark:border-neutral-700 dark:hover:bg-neutral-800"
-                          }`}
-                        >
-                          Online Live 1-on-1
-                        </button>
+                          <option value="">-- Choose Class --</option>
+                          <option value="Nursery-UKG">Nursery to UKG</option>
+                          <option value="Class 1-5">Class 1 to 5</option>
+                          <option value="Class 6-8">Class 6 to 8</option>
+                          <option value="Class 9-10">Class 9 & 10 (Board)</option>
+                          <option value="Class 11-12">Class 11 & 12 (Intermediate)</option>
+                          <option value="IIT-JEE/NEET">IIT-JEE / NEET Prep</option>
+                        </select>
                       </div>
-                    </div>
 
-                    <Button type="submit" className="h-11 font-semibold w-full mt-2">
-                      Find Matching Tutors
-                      <ArrowRight size={16} />
-                    </Button>
-                  </form>
-                </div>
+                      <div className="translate-z-20">
+                        <label className="block text-xs font-semibold text-neutral-600 dark:text-neutral-400 mb-1.5">
+                          Target Subject
+                        </label>
+                        <select
+                          value={matchSubject}
+                          onChange={(e) => setMatchSubject(e.target.value)}
+                          required
+                          className="w-full h-10 px-3 rounded-md border border-neutral-200 bg-white text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white shadow-sm"
+                        >
+                          <option value="">-- Choose Subject --</option>
+                          <option value="Mathematics">Mathematics</option>
+                          <option value="Physics">Physics</option>
+                          <option value="Chemistry">Chemistry</option>
+                          <option value="Biology">Biology</option>
+                          <option value="General Science">General Science</option>
+                          <option value="English">English / Grammar</option>
+                          <option value="Languages">Hindi / Telugu / Sanskrit</option>
+                          <option value="Coding">Coding (Scratch/Python)</option>
+                        </select>
+                      </div>
+
+                      <div className="translate-z-20">
+                        <label className="block text-xs font-semibold text-neutral-600 dark:text-neutral-400 mb-1.5">
+                          Tuition Mode
+                        </label>
+                        <div className="grid grid-cols-2 gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setMatchType("HOME")}
+                            className={`h-10 text-xs font-semibold rounded-md border transition-all ${
+                              matchType === "HOME"
+                                ? "border-brand-500 bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-brand-400 shadow-sm"
+                                : "border-neutral-200 hover:bg-neutral-50 dark:border-neutral-700 dark:hover:bg-neutral-800"
+                            }`}
+                          >
+                            At Home (Offline)
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setMatchType("ONLINE")}
+                            className={`h-10 text-xs font-semibold rounded-md border transition-all ${
+                              matchType === "ONLINE"
+                                ? "border-brand-500 bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-brand-400 shadow-sm"
+                                : "border-neutral-200 hover:bg-neutral-50 dark:border-neutral-700 dark:hover:bg-neutral-800"
+                            }`}
+                          >
+                            Online Live 1-on-1
+                          </button>
+                        </div>
+                      </div>
+
+                      <Button type="submit" className="h-11 font-semibold w-full mt-2 translate-z-30 shadow-lg shadow-brand-500/20">
+                        Find Matching Tutors
+                        <ArrowRight size={16} />
+                      </Button>
+                    </form>
+                  </div>
+                </ThreeDTilt>
               </div>
             </div>
           </div>
@@ -303,48 +308,48 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              <div className="p-6 rounded-xl bg-white border border-neutral-100 dark:bg-neutral-900 dark:border-neutral-800 flex items-start gap-4 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-                <div className="p-3 rounded-lg bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400">
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 perspective-1000">
+              <div className="p-6 rounded-2xl bg-white border border-neutral-100 dark:bg-neutral-900 dark:border-neutral-800 flex items-start gap-4 hover-3d-card glow-shadow-brand preserve-3d">
+                <div className="p-3 rounded-xl bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400 shrink-0 translate-z-30">
                   <ShieldCheck size={24} />
                 </div>
-                <div>
+                <div className="translate-z-20">
                   <h3 className="text-2xl font-bold text-neutral-900 dark:text-white leading-none">5,000+</h3>
-                  <p className="text-sm font-semibold text-neutral-700 dark:text-neutral-350 mt-1">Verified Tutors</p>
-                  <p className="text-xs text-neutral-500 dark:text-neutral-450 mt-1">Background and document verified academic experts.</p>
+                  <p className="text-sm font-bold text-neutral-800 dark:text-neutral-250 mt-2">Verified Tutors</p>
+                  <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1 leading-relaxed">Background and document verified academic experts.</p>
                 </div>
               </div>
 
-              <div className="p-6 rounded-xl bg-white border border-neutral-100 dark:bg-neutral-900 dark:border-neutral-800 flex items-start gap-4 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-                <div className="p-3 rounded-lg bg-accent-50 dark:bg-accent-500/10 text-accent-600 dark:text-accent-400">
+              <div className="p-6 rounded-2xl bg-white border border-neutral-100 dark:bg-neutral-900 dark:border-neutral-800 flex items-start gap-4 hover-3d-card glow-shadow-accent preserve-3d">
+                <div className="p-3 rounded-xl bg-accent-50 dark:bg-accent-500/10 text-accent-600 dark:text-accent-400 shrink-0 translate-z-30">
                   <Users size={24} />
                 </div>
-                <div>
+                <div className="translate-z-20">
                   <h3 className="text-2xl font-bold text-neutral-900 dark:text-white leading-none">25,000+</h3>
-                  <p className="text-sm font-semibold text-neutral-700 dark:text-neutral-350 mt-1">Students Taught</p>
-                  <p className="text-xs text-neutral-500 dark:text-neutral-450 mt-1">Empowering students across Hyderabad to achieve board goals.</p>
+                  <p className="text-sm font-bold text-neutral-800 dark:text-neutral-250 mt-2">Students Taught</p>
+                  <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1 leading-relaxed">Empowering students across Hyderabad to achieve board goals.</p>
                 </div>
               </div>
 
-              <div className="p-6 rounded-xl bg-white border border-neutral-100 dark:bg-neutral-900 dark:border-neutral-800 flex items-start gap-4 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-                <div className="p-3 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+              <div className="p-6 rounded-2xl bg-white border border-neutral-100 dark:bg-neutral-900 dark:border-neutral-800 flex items-start gap-4 hover-3d-card glow-shadow-success preserve-3d">
+                <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0 translate-z-30">
                   <Award size={24} />
                 </div>
-                <div>
+                <div className="translate-z-20">
                   <h3 className="text-2xl font-bold text-neutral-900 dark:text-white leading-none">100%</h3>
-                  <p className="text-sm font-semibold text-neutral-700 dark:text-neutral-350 mt-1">Free Replacement</p>
-                  <p className="text-xs text-neutral-500 dark:text-neutral-450 mt-1">If the tutor is not a fit, we match you with a replacement immediately.</p>
+                  <p className="text-sm font-bold text-neutral-800 dark:text-neutral-250 mt-2">Free Replacement</p>
+                  <p className="text-xs text-neutral-500 dark:text-neutral-450 mt-1 leading-relaxed">If the tutor is not a fit, we match you with a replacement immediately.</p>
                 </div>
               </div>
 
-              <div className="p-6 rounded-xl bg-white border border-neutral-100 dark:bg-neutral-900 dark:border-neutral-800 flex items-start gap-4 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-                <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400">
+              <div className="p-6 rounded-2xl bg-white border border-neutral-100 dark:bg-neutral-900 dark:border-neutral-800 flex items-start gap-4 hover-3d-card glow-shadow-warning preserve-3d">
+                <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 shrink-0 translate-z-30">
                   <Clock3 size={24} />
                 </div>
-                <div>
+                <div className="translate-z-20">
                   <h3 className="text-2xl font-bold text-neutral-900 dark:text-white leading-none">Flexible</h3>
-                  <p className="text-sm font-semibold text-neutral-700 dark:text-neutral-350 mt-1">Schedules & Budget</p>
-                  <p className="text-xs text-neutral-500 dark:text-neutral-450 mt-1">Set timings and frequency that fit your family schedule.</p>
+                  <p className="text-sm font-bold text-neutral-800 dark:text-neutral-250 mt-2">Schedules & Budget</p>
+                  <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1 leading-relaxed">Set timings and frequency that fit your family schedule.</p>
                 </div>
               </div>
             </div>
@@ -364,20 +369,22 @@ export default function HomePage() {
             </div>
 
             {/* Tabs Selector */}
-            <div className="flex flex-wrap justify-center gap-2 mb-10 border-b border-neutral-250/60 pb-4 dark:border-neutral-800">
-              {SUBJECT_CATEGORIES.map((cat) => (
-                <button
-                  key={cat.id}
-                  onClick={() => setActiveTab(cat.id)}
-                  className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${
-                    activeTab === cat.id
-                      ? "bg-brand-500 text-white shadow-md shadow-brand-500/20"
-                      : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-white"
-                  }`}
-                >
-                  {cat.label}
-                </button>
-              ))}
+            <div className="flex justify-center mb-12">
+              <div className="inline-flex flex-wrap justify-center gap-1.5 p-1.5 bg-neutral-150/60 dark:bg-neutral-900/90 rounded-2xl shadow-inner border border-neutral-200/50 dark:border-neutral-800/80">
+                {SUBJECT_CATEGORIES.map((cat) => (
+                  <button
+                    key={cat.id}
+                    onClick={() => setActiveTab(cat.id)}
+                    className={`px-5 py-2.5 text-xs md:text-sm font-bold rounded-xl transition-all duration-300 ${
+                      activeTab === cat.id
+                        ? "bg-white text-brand-600 shadow-md scale-102 dark:bg-neutral-800 dark:text-brand-400 border border-neutral-200/30 dark:border-neutral-700/50"
+                        : "text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-200"
+                    }`}
+                  >
+                    {cat.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Tab Panel */}
@@ -419,10 +426,10 @@ export default function HomePage() {
                         {cat.subjects.map((sub, idx) => (
                           <div
                             key={idx}
-                            className="p-4 rounded-xl border border-neutral-100 bg-neutral-50 dark:bg-neutral-900 dark:border-neutral-800 hover:border-brand-500/40 transition-colors flex items-center gap-3"
+                            className="p-4 rounded-xl border border-neutral-100 bg-neutral-50 dark:bg-neutral-900 dark:border-neutral-800 hover:border-brand-500/40 hover:-translate-y-1 hover:shadow-md transition-all duration-300 flex items-center gap-3 cursor-default"
                           >
-                            <div className="h-2 w-2 rounded-full bg-accent-500" />
-                            <span className="text-sm font-semibold text-neutral-800 dark:text-neutral-200">{sub}</span>
+                            <div className="h-2.5 w-2.5 rounded-full bg-accent-500 animate-pulse" />
+                            <span className="text-sm font-bold text-neutral-800 dark:text-neutral-200">{sub}</span>
                           </div>
                         ))}
                       </div>
@@ -446,48 +453,48 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="grid gap-8 lg:grid-cols-3 relative">
+            <div className="grid gap-8 lg:grid-cols-3 relative perspective-1000">
               {/* Stepper Connecting Lines (Desktop only) */}
               <div className="hidden lg:block absolute top-14 left-[15%] right-[15%] h-0.5 bg-neutral-250 dark:bg-neutral-800 -z-10" />
 
               {/* Step 1 */}
-              <div className="flex flex-col items-center text-center p-6 bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-100 dark:border-neutral-800 shadow-sm relative group hover:shadow-md transition-shadow">
-                <div className="absolute top-[-20px] h-10 w-10 rounded-full bg-brand-500 text-white font-bold text-sm flex items-center justify-center border-4 border-white dark:border-neutral-900 shadow-md">
+              <div className="flex flex-col items-center text-center p-6 bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-100 dark:border-neutral-800 shadow-sm relative group hover-3d-card preserve-3d">
+                <div className="absolute top-[-20px] h-10 w-10 rounded-full bg-brand-500 text-white font-extrabold text-sm flex items-center justify-center border-4 border-white dark:border-neutral-900 shadow-md group-hover:scale-110 transition-transform translate-z-30">
                   1
                 </div>
-                <div className="h-16 w-16 rounded-2xl bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400 flex items-center justify-center mt-4 mb-5 group-hover:scale-110 transition-transform">
+                <div className="h-16 w-16 rounded-2xl bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400 flex items-center justify-center mt-4 mb-5 group-hover:rotate-6 group-hover:scale-110 transition-all duration-300 translate-z-30">
                   <BookOpen size={28} />
                 </div>
-                <h3 className="text-lg font-bold text-neutral-900 dark:text-white">Share Requirements</h3>
-                <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-2 leading-relaxed">
+                <h3 className="text-lg font-extrabold text-neutral-900 dark:text-white translate-z-20">Share Requirements</h3>
+                <p className="text-xs text-neutral-500 dark:text-neutral-450 mt-2 leading-relaxed translate-z-20">
                   Fill our simple request form detailing class, subjects, location, budget, and preferences.
                 </p>
               </div>
 
               {/* Step 2 */}
-              <div className="flex flex-col items-center text-center p-6 bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-100 dark:border-neutral-800 shadow-sm relative group hover:shadow-md transition-shadow">
-                <div className="absolute top-[-20px] h-10 w-10 rounded-full bg-brand-500 text-white font-bold text-sm flex items-center justify-center border-4 border-white dark:border-neutral-900 shadow-md">
+              <div className="flex flex-col items-center text-center p-6 bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-100 dark:border-neutral-800 shadow-sm relative group hover-3d-card preserve-3d">
+                <div className="absolute top-[-20px] h-10 w-10 rounded-full bg-brand-500 text-white font-extrabold text-sm flex items-center justify-center border-4 border-white dark:border-neutral-900 shadow-md group-hover:scale-110 transition-transform translate-z-30">
                   2
                 </div>
-                <div className="h-16 w-16 rounded-2xl bg-accent-50 dark:bg-accent-500/10 text-accent-600 dark:text-accent-400 flex items-center justify-center mt-4 mb-5 group-hover:scale-110 transition-transform">
+                <div className="h-16 w-16 rounded-2xl bg-accent-50 dark:bg-accent-500/10 text-accent-600 dark:text-accent-400 flex items-center justify-center mt-4 mb-5 group-hover:-rotate-6 group-hover:scale-110 transition-all duration-300 translate-z-30">
                   <Clock3 size={28} />
                 </div>
-                <h3 className="text-lg font-bold text-neutral-900 dark:text-white">Free 1-Hour Demo</h3>
-                <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-2 leading-relaxed">
+                <h3 className="text-lg font-extrabold text-neutral-900 dark:text-white translate-z-20">Free 1-Hour Demo</h3>
+                <p className="text-xs text-neutral-500 dark:text-neutral-455 mt-2 leading-relaxed translate-z-20">
                   We schedule a free trial demo session in your home or online with the most qualified matching tutor.
                 </p>
               </div>
 
               {/* Step 3 */}
-              <div className="flex flex-col items-center text-center p-6 bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-100 dark:border-neutral-800 shadow-sm relative group hover:shadow-md transition-shadow">
-                <div className="absolute top-[-20px] h-10 w-10 rounded-full bg-brand-500 text-white font-bold text-sm flex items-center justify-center border-4 border-white dark:border-neutral-900 shadow-md">
+              <div className="flex flex-col items-center text-center p-6 bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-100 dark:border-neutral-800 shadow-sm relative group hover-3d-card preserve-3d">
+                <div className="absolute top-[-20px] h-10 w-10 rounded-full bg-brand-500 text-white font-extrabold text-sm flex items-center justify-center border-4 border-white dark:border-neutral-900 shadow-md group-hover:scale-110 transition-transform translate-z-30">
                   3
                 </div>
-                <div className="h-16 w-16 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mt-4 mb-5 group-hover:scale-110 transition-transform">
+                <div className="h-16 w-16 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mt-4 mb-5 group-hover:rotate-6 group-hover:scale-110 transition-all duration-300 translate-z-30">
                   <Globe2 size={28} />
                 </div>
-                <h3 className="text-lg font-bold text-neutral-900 dark:text-white">Confirm & Start</h3>
-                <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-2 leading-relaxed">
+                <h3 className="text-lg font-extrabold text-neutral-900 dark:text-white translate-z-20">Confirm & Start</h3>
+                <p className="text-xs text-neutral-500 dark:text-neutral-450 mt-2 leading-relaxed translate-z-20">
                   Approve the tutor after the demo, finalize tuition scheduling, and begin matching classes.
                 </p>
               </div>
@@ -507,29 +514,29 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="grid gap-8 md:grid-cols-3">
+            <div className="grid gap-8 md:grid-cols-3 perspective-1000">
               {TESTIMONIALS.map((t, idx) => (
                 <div
                   key={idx}
-                  className="p-6 rounded-2xl border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900/60 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between"
+                  className="p-6 rounded-2xl border border-white/30 glass-morphic shadow-lg hover-3d-card preserve-3d flex flex-col justify-between"
                 >
-                  <div>
+                  <div className="translate-z-20">
                     <div className="flex items-center gap-1 mb-4">
                       {[...Array(t.rating)].map((_, i) => (
                         <Star key={i} size={16} className="fill-accent-500 text-accent-500" />
                       ))}
                     </div>
-                    <p className="text-sm text-neutral-650 dark:text-neutral-350 italic leading-relaxed">
+                    <p className="text-sm text-neutral-600 dark:text-neutral-300 italic leading-relaxed">
                       "{t.quote}"
                     </p>
                   </div>
-                  <div className="mt-6 pt-4 border-t border-neutral-100 dark:border-neutral-800 flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-brand-500/10 flex items-center justify-center font-bold text-brand-650 dark:text-brand-300">
+                  <div className="mt-6 pt-4 border-t border-neutral-250/30 dark:border-neutral-850 flex items-center gap-3 translate-z-30">
+                    <div className="h-10 w-10 rounded-full bg-brand-500/15 flex items-center justify-center font-extrabold text-brand-650 dark:text-brand-350">
                       {t.name.split(" ").map(w => w[0]).join("")}
                     </div>
                     <div>
-                      <h4 className="text-sm font-bold text-neutral-900 dark:text-white">{t.name}</h4>
-                      <p className="text-[11px] font-semibold text-neutral-400 mt-0.5">{t.role}</p>
+                      <h4 className="text-sm font-extrabold text-neutral-900 dark:text-white">{t.name}</h4>
+                      <p className="text-[11px] font-bold text-neutral-400 mt-0.5">{t.role}</p>
                     </div>
                   </div>
                 </div>
@@ -539,14 +546,15 @@ export default function HomePage() {
         </section>
 
         {/* Tutor CTA Banner */}
-        <section className="py-12 bg-gradient-to-br from-brand-600 via-brand-500 to-indigo-700 text-white select-none">
-          <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center gap-4">
-            <h2 className="text-3xl font-bold tracking-tight">Are You a Passionate Home Tutor?</h2>
-            <p className="max-w-xl text-sm text-white/90 leading-relaxed">
+        <section className="py-16 bg-gradient-to-tr from-brand-700 via-brand-550 to-accent-600 text-white select-none relative overflow-hidden">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(255,255,255,0.08),transparent)]" />
+          <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center gap-4 relative z-10">
+            <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">Are You a Passionate Home Tutor?</h2>
+            <p className="max-w-xl text-sm text-white/85 leading-relaxed">
               Earn a highly competitive income by teaching students in your preferred areas. Access match support and clear monthly payouts.
             </p>
-            <Link href="/tutor-registration" className="mt-2">
-              <Button size="lg" className="border-none bg-white text-brand-700 hover:bg-neutral-100 font-bold shadow-md shadow-black/10">
+            <Link href="/tutor-registration" className="mt-4 hover:scale-105 active:scale-98 transition-transform">
+              <Button size="lg" className="border-none bg-white text-brand-700 hover:bg-neutral-50 font-extrabold shadow-xl shadow-brand-500/10">
                 Join our Tutor Network
               </Button>
             </Link>

@@ -2,14 +2,14 @@
 
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useMutation } from "@tanstack/react-query";
 import {
   ChevronLeft,
   ChevronRight,
   CheckCircle2,
   MapPin,
   BookOpen,
-  Phone,
   User,
   Mail,
   Sparkles
@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/Button";
 import { Stepper } from "@/components/ui/Stepper";
 import { SiteHeader } from "@/components/features/marketing/SiteHeader";
 import { SiteFooter } from "@/components/features/marketing/SiteFooter";
+import { leadsApi } from "@/lib/api/leads";
 
 const STEPS = ["Academic Details", "Tuition Preferences", "Contact Info"];
 
@@ -50,11 +51,15 @@ const SUBJECT_OPTIONS = [
 
 function RequestTutorForm() {
   const searchParams = useSearchParams();
-  const router = useRouter();
 
   // Form Step State
   const [activeStep, setActiveStep] = useState(0);
   const [isSubmitted, setIsSubmitted] = useState(false);
+
+  const submitMutation = useMutation({
+    mutationFn: leadsApi.submitTuitionInquiry,
+    onSuccess: () => setIsSubmitted(true),
+  });
 
   // Form Data State
   const [grade, setGrade] = useState("");
@@ -145,7 +150,20 @@ function RequestTutorForm() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validateStep()) {
-      setIsSubmitted(true);
+      submitMutation.mutate({
+        grade,
+        board,
+        subjects: selectedSubjects,
+        tuitionMode,
+        address: tuitionMode === "HOME" ? address : undefined,
+        timings,
+        frequency,
+        parentName,
+        mobile,
+        email: email.trim() || undefined,
+        budget,
+        remarks: remarks.trim() || undefined,
+      });
     }
   };
 
@@ -541,6 +559,7 @@ function RequestTutorForm() {
             ) : (
               <Button
                 type="submit"
+                loading={submitMutation.isPending}
                 className="font-semibold text-xs h-10 px-6 shadow-md shadow-brand-500/10"
               >
                 Submit Tutor Request
@@ -548,6 +567,12 @@ function RequestTutorForm() {
               </Button>
             )}
           </div>
+
+          {submitMutation.isError && (
+            <p role="alert" className="text-sm text-danger-500">
+              Something went wrong submitting your request - please try again.
+            </p>
+          )}
         </form>
       </div>
     </div>

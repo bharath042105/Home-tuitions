@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -27,24 +28,26 @@ public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
 
-    @Value("${app.cors.allowed-origins}")
+    @Value("${app.cors.allowed-origins:*}")
     private List<String> corsAllowedOrigins;
 
     public SecurityConfig(JwtAuthFilter jwtAuthFilter) {
         this.jwtAuthFilter = jwtAuthFilter;
     }
 
-    // app.cors.allowed-origins was defined in application.yml but never actually wired
-    // into Spring Security - without this, the website/admin (a different origin than
-    // the API) get every request silently blocked by the browser's CORS check, which
-    // surfaces to the user as the request just failing.
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(corsAllowedOrigins);
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        if (corsAllowedOrigins != null && !corsAllowedOrigins.isEmpty() && !corsAllowedOrigins.contains("*")) {
+            configuration.setAllowedOriginPatterns(corsAllowedOrigins);
+        } else {
+            configuration.setAllowedOriginPatterns(List.of("*"));
+        }
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"));
         configuration.setAllowedHeaders(List.of("*"));
+        configuration.setExposedHeaders(List.of("Authorization", "Link", "X-Total-Count"));
         configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
@@ -52,10 +55,6 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationEntryPoint unauthorizedEntryPoint() {
-        // Spring Security's own default entry point (Http403ForbiddenEntryPoint) sends
-        // 403 for missing/invalid auth too, which is indistinguishable from an
-        // authenticated-but-wrong-role 403 on the client. Sending 401 here restores
-        // that distinction so onUnauthorized() (which only fires on 401) can do its job.
         return (request, response, authException) ->
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
     }
@@ -72,15 +71,10 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable()) // stateless JWT API, no cookies involved
             .cors(Customizer.withDefaults()) // picks up the corsConfigurationSource bean above
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            // Without this, a missing/expired token still gets Spring Security's default
-            // AnonymousAuthenticationFilter's principal, which counts as "authenticated"
-            // for authorization purposes - so a role-gated endpoint (hasRole("TUTOR") etc.)
-            // rejects it with 403 Access Denied instead of 401 Unauthorized. The frontend's
-            // token-refresh-and-retry logic only triggers on 401, so that 403 silently
-            // broke the refresh flow for anyone whose access token expired mid-session.
             .anonymous(AbstractHttpConfigurer::disable)
             .exceptionHandling(ex -> ex.authenticationEntryPoint(unauthorizedEntryPoint()))
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers(
                     "/api/v1/auth/register",
                     "/api/v1/auth/login",

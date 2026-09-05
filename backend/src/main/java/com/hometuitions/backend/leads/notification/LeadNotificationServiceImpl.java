@@ -229,6 +229,12 @@ public class LeadNotificationServiceImpl implements LeadNotificationService {
         }
     }
 
+    @Value("${BREVO_API_KEY:${app.brevo.api-key:}}")
+    private String brevoApiKey;
+
+    @Value("${BREVO_FROM_EMAIL:${app.brevo.from-email:vidyatutorspoint@gmail.com}}")
+    private String brevoFromEmail;
+
     private void sendEmail(String subject, String plainText, String html) {
         List<String> recipients = Arrays.stream(adminEmailsRaw.split(","))
                 .map(String::trim)
@@ -237,11 +243,21 @@ public class LeadNotificationServiceImpl implements LeadNotificationService {
                 .toList();
 
         String cleanResendKey = resendApiKey != null ? resendApiKey.trim().replaceAll("[\"']", "") : "";
+        String cleanBrevoKey = brevoApiKey != null ? brevoApiKey.trim().replaceAll("[\"']", "") : "";
 
-        // 🚀 PREFERRED FOR RENDER: Resend HTTPS REST API (Port 443 - Never Blocked)
+        // 🚀 OPTION 1: Brevo HTTPS API (Sends to ANY email without domain verification)
+        if (!cleanBrevoKey.isBlank()) {
+            log.info("🚀 Sending email via Brevo HTTPS API to: {}", recipients);
+            sendViaBrevoApi(cleanBrevoKey, recipients, subject, html);
+            return;
+        }
+
+        // 🚀 OPTION 2: Resend HTTPS API (Sends individually to avoid batch rejection in sandbox)
         if (!cleanResendKey.isBlank()) {
-            log.info("🚀 Sending email via Resend HTTPS API (Port 443) to: {}", recipients);
-            sendViaResendApi(cleanResendKey, recipients, subject, plainText, html);
+            log.info("🚀 Sending email via Resend HTTPS API to: {}", recipients);
+            for (String recipient : recipients) {
+                sendViaResendApi(cleanResendKey, recipient, subject, plainText, html);
+            }
             return;
         }
 
@@ -270,11 +286,11 @@ public class LeadNotificationServiceImpl implements LeadNotificationService {
         }
     }
 
-    private void sendViaResendApi(String apiKey, List<String> recipients, String subject, String plainText, String html) {
+    private void sendViaResendApi(String apiKey, String recipient, String subject, String plainText, String html) {
         try {
             Map<String, Object> payload = new HashMap<>();
             payload.put("from", resendFromEmail != null && !resendFromEmail.isBlank() ? resendFromEmail : "Vidya Home Tuitions <onboarding@resend.dev>");
-            payload.put("to", recipients);
+            payload.put("to", List.of(recipient));
             payload.put("subject", subject);
             payload.put("html", html);
             payload.put("text", plainText);
@@ -292,12 +308,52 @@ public class LeadNotificationServiceImpl implements LeadNotificationService {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() >= 200 && response.statusCode() < 300) {
-                log.info("✅ Resend API delivery SUCCESS! Response: {}", response.body());
+                log.info("✅ Resend API email successfully delivered to: {}", recipient);
             } else {
-                log.error("❌ Resend API returned error status {}: {}", response.statusCode(), response.body());
+                log.warn("⚠️ Resend API returned status {} for {}: {}", response.statusCode(), recipient, response.body());
             }
         } catch (Exception e) {
-            log.error("❌ Failed to send email via Resend HTTPS API: {}", e.getMessage(), e);
+            log.error("❌ Failed to send email via Resend to {}: {}", recipient, e.getMessage(), e);
+        }
+    }
+
+    private void sendViaBrevoApi(String apiKey, List<String> recipients, String subject, String html) {
+        try {
+            Map<String, Object> payload = new HashMap<>();
+            Map<String, String> sender = new HashMap<>();
+            sender.put("name", "Vidya Home Tuitions");
+            sender.put("email", brevoFromEmail != null ? brevoFromEmail : "vidyatutorspoint@gmail.com");
+            payload.put("sender", sender);
+
+            List<Map<String, String>> toList = recipients.stream().map(email -> {
+                Map<String, String> m = new HashMap<>();
+                m.put("email", email);
+                return m;
+            }).toList();
+
+            payload.put("to", toList);
+            payload.put("subject", subject);
+            payload.put("htmlContent", html);
+
+            String requestBody = objectMapper.writeValueAsString(payload);
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("https://api.brevo.com/v3/smtp/email"))
+                    .header("api-key", apiKey)
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+                    .timeout(Duration.ofSeconds(15))
+                    .build();
+
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() >= 200 && response.statusCode() < 300) {
+                log.info("✅ Brevo API email successfully delivered to all recipients: {}", recipients);
+            } else {
+                log.error("❌ Brevo API returned error status {}: {}", response.statusCode(), response.body());
+            }
+        } catch (Exception e) {
+            log.error("❌ Failed to send email via Brevo API: {}", e.getMessage(), e);
         }
     }
 

@@ -92,7 +92,8 @@ public class SecurityConfig {
                     "/api/v1/webhooks/razorpay",
                     "/ws/**",
                     "/swagger-ui/**", "/v3/api-docs/**",
-                    "/actuator/health"
+                    "/actuator/health",
+                    "/health"
                 ).permitAll()
                 // /api/v1/auth/logout is intentionally NOT in the list above - it reads
                 // the caller's identity from the validated JWT (see AuthController), so it

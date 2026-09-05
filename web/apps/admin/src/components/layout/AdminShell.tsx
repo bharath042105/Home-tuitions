@@ -37,13 +37,13 @@ const NAV_ITEMS = [
 function VidyaLogo({ collapsed }: { collapsed: boolean }) {
   return (
     <div className={`flex items-center gap-2.5 select-none overflow-hidden transition-all duration-300 ${collapsed ? "justify-center" : ""}`}>
-      <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-xl shadow-sm">
+      <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-2xl border border-brand-500/30 dark:border-brand-400/40 bg-white dark:bg-neutral-900 shadow-sm">
         <Image
           src="/logo.png"
           alt="Vidya Logo"
           fill
           sizes="36px"
-          className="object-contain"
+          className="object-contain p-0.5"
           priority
         />
       </div>

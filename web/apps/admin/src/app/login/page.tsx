@@ -61,6 +61,9 @@ export default function AdminLoginPage() {
               {loginMutation.isPending ? "Signing in..." : "Sign in"}
             </Button>
             {loginMutation.isError && <Alert severity="error">{loginMutation.error.message}</Alert>}
+            <Typography variant="caption" color="text.secondary" align="center" sx={{ mt: 1 }}>
+              Official Admin Support: vidyatutorspoint@gmail.com | +91 80744 70640
+            </Typography>
           </Stack>
         </form>
       </Paper>

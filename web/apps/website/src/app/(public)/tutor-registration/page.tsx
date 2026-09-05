@@ -36,19 +36,30 @@ const STEP_HEADERS = [
 ];
 
 const GRADE_LEVELS = [
-  "Nursery - UKG",
-  "Class 1 - 5",
-  "Class 6 - 8",
-  "Class 9 - 10 (Secondary)",
-  "Class 11 - 12 (Intermediate)",
+  "Nursery / LKG / UKG",
+  "Class 1",
+  "Class 2",
+  "Class 3",
+  "Class 4",
+  "Class 5",
+  "Class 6",
+  "Class 7",
+  "Class 8",
+  "Class 9",
+  "Class 10 (Secondary Board)",
+  "Class 11 (Intermediate / 1st Year)",
+  "Class 12 (Intermediate / 2nd Year)",
   "IIT-JEE Prep",
   "NEET Prep",
-  "Coding & Programming"
+  "Degree / B.Tech Engineering",
+  "Coding & Programming",
+  "All Classes"
 ];
 
-const BOARD_OPTIONS = ["CBSE", "ICSE / ISC", "SSC (Telangana Board)", "IGCSE / IB"];
+const BOARD_OPTIONS = ["CBSE", "ICSE / ISC", "SSC (Telangana Board)", "IGCSE / IB", "Other State Boards"];
 
 const SUBJECT_OPTIONS = [
+  "ALL Subjects",
   "Mathematics",
   "Physics",
   "Chemistry",
@@ -59,7 +70,8 @@ const SUBJECT_OPTIONS = [
   "Hindi / Sanskrit",
   "Telugu",
   "Python / Java Programming",
-  "Web Development"
+  "Web Development & Coding",
+  "Accountancy & Economics"
 ];
 
 export default function TutorRegistrationPage() {
@@ -100,7 +112,8 @@ export default function TutorRegistrationPage() {
   const [occupation, setOccupation] = useState("SCHOOL");
   const [experience, setExperience] = useState("Fresher");
   const [expectedRate, setExpectedRate] = useState("");
-  const [timings, setTimings] = useState("Evening (4 PM - 8 PM)");
+  const [timingOption, setTimingOption] = useState("Evening (4 PM - 8 PM)");
+  const [customTiming, setCustomTiming] = useState("");
   const [bio, setBio] = useState("");
 
   // Form State - Step 6: Uploads (File names placeholders)
@@ -116,6 +129,33 @@ export default function TutorRegistrationPage() {
     mutationFn: leadsApi.submitTutorApplication,
     onSuccess: () => setIsSubmitted(true),
   });
+
+  const getEffectiveTimings = () => {
+    if (timingOption === "Custom Timing") {
+      return customTiming.trim() || "Custom Timing (Flexible)";
+    }
+    return timingOption;
+  };
+
+  const toggleSubject = (sub: string) => {
+    if (sub === "ALL Subjects") {
+      if (selectedSubjects.includes("ALL Subjects")) {
+        setSelectedSubjects([]);
+      } else {
+        setSelectedSubjects(["ALL Subjects"]);
+      }
+      setErrors((prev) => ({ ...prev, subjects: "" }));
+      return;
+    }
+
+    setSelectedSubjects((prev) => {
+      const filtered = prev.filter((s) => s !== "ALL Subjects");
+      return filtered.includes(sub)
+        ? filtered.filter((s) => s !== sub)
+        : [...filtered, sub];
+    });
+    setErrors((prev) => ({ ...prev, subjects: "" }));
+  };
 
   const validateStep = (step: number) => {
     const stepErrors: Record<string, string> = {};
@@ -143,6 +183,9 @@ export default function TutorRegistrationPage() {
       if (!email.trim() || !/\S+@\S+\.\S+/.test(email)) stepErrors.email = "Valid email address is required";
     } else if (step === 4) {
       if (!expectedRate.trim()) stepErrors.expectedRate = "Expected rate is required";
+      if (timingOption === "Custom Timing" && !customTiming.trim()) {
+        stepErrors.timings = "Please specify your custom available timing";
+      }
     } else if (step === 5) {
       if (!photoFile) stepErrors.photo = "Please upload profile photo";
       if (!aadhaarFile) stepErrors.aadhaar = "Please upload Aadhaar card (front & back)";
@@ -189,7 +232,7 @@ export default function TutorRegistrationPage() {
         occupation,
         experience,
         expectedRate,
-        timings,
+        timings: getEffectiveTimings(),
         bio: bio.trim() || undefined,
       });
     }
@@ -203,6 +246,27 @@ export default function TutorRegistrationPage() {
   };
 
   if (isSubmitted) {
+    const effectiveTimings = getEffectiveTimings();
+    const whatsappText = `*New Tutor Application - Vidya Home Tuitions*\n\n` +
+      `*Tutor Name:* ${name}\n` +
+      `*Qualification:* ${qualification} (${percentage}% - ${passYear})\n` +
+      `*College:* ${college}\n` +
+      `*Phone:* +91 ${mobile}\n` +
+      `*WhatsApp:* +91 ${whatsapp}\n` +
+      `*Email:* ${email}\n` +
+      `*Localities:* ${localities} (${commuteDistance})\n` +
+      `*Classes/Grades:* ${selectedGrades.join(", ")}\n` +
+      `*Subjects:* ${selectedSubjects.join(", ")}\n` +
+      `*Boards:* ${selectedBoards.join(", ")}\n` +
+      `*Mode:* ${mode} | *Medium:* ${medium}\n` +
+      `*Experience:* ${experience}\n` +
+      `*Expected Pay:* ${expectedRate}\n` +
+      `*Timings:* ${effectiveTimings}\n` +
+      `\nPlease review credentials for onboarding.`;
+
+    const whatsappUrl = `https://wa.me/918074470640?text=${encodeURIComponent(whatsappText)}`;
+    const emailMailto = `mailto:vidyatutorspoint@gmail.com,info@vidyahometuitions.com?subject=${encodeURIComponent(`New Tutor Application: ${name} - ${qualification}`)}&body=${encodeURIComponent(whatsappText.replace(/\*/g, ""))}`;
+
     return (
       <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950/20 flex flex-col">
         <SiteHeader />
@@ -246,6 +310,28 @@ export default function TutorRegistrationPage() {
                 </div>
               </li>
             </ol>
+          </div>
+
+          <div className="flex flex-col gap-2.5 w-full">
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold text-sm shadow-md transition-all hover:scale-[1.01]"
+            >
+              <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.664-.698c.983.536 1.83.827 2.796.827 3.182 0 5.768-2.586 5.768-5.766 0-3.18-2.586-5.714-5.768-5.714zm3.385 8.163c-.143.403-.828.74-1.15.787-.323.047-.743.08-2.128-.491-1.63-.672-2.67-2.327-2.752-2.436-.081-.109-.661-.879-.661-1.674 0-.795.419-1.186.568-1.344.15-.157.327-.197.436-.197.109 0 .218.001.314.006.101.005.237-.038.37.284.137.329.467 1.139.508 1.222.041.083.068.181.014.289-.055.109-.082.176-.164.272-.082.096-.173.214-.247.288-.082.082-.168.172-.072.336.096.164.427.705.916 1.141.629.561 1.159.734 1.323.816.164.082.26-.07.356-.179.096-.109.41-.478.52-.642.109-.164.218-.137.368-.082.15.055.956.451 1.12.533.164.082.273.123.314.191.041.069.041.396-.102.8z" />
+              </svg>
+              Chat on WhatsApp with Details
+            </a>
+
+            <a
+              href={emailMailto}
+              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-750 text-neutral-700 dark:text-neutral-200 font-semibold text-xs transition-colors"
+            >
+              <Mail size={15} />
+              Send Application Copy via Email
+            </a>
           </div>
 
           <Link href="/" className="w-full">
@@ -541,9 +627,9 @@ export default function TutorRegistrationPage() {
                                 <button
                                   key={sub}
                                   type="button"
-                                  onClick={() => setSelectedSubjects(prev => prev.includes(sub) ? prev.filter(x => x !== sub) : [...prev, sub])}
+                                  onClick={() => toggleSubject(sub)}
                                   className={`px-3 py-1.5 text-xs font-semibold rounded-full border transition-all ${
-                                    isSel ? "border-brand-500 bg-brand-500 text-white" : "border-neutral-200 dark:border-neutral-700 hover:border-neutral-300"
+                                    isSel ? "border-brand-500 bg-brand-500 text-white shadow-sm" : "border-neutral-200 dark:border-neutral-700 hover:border-neutral-300"
                                   }`}
                                 >
                                   {sub}
@@ -718,18 +804,40 @@ export default function TutorRegistrationPage() {
                             {errors.expectedRate && <p className="text-xs text-danger-500 mt-1">{errors.expectedRate}</p>}
                           </div>
                           <div>
-                            <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-350 mb-1.5">Available timings</label>
+                            <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-350 mb-1.5">Available Timings</label>
                             <select
-                              value={timings}
-                              onChange={(e) => setTimings(e.target.value)}
+                              value={timingOption}
+                              onChange={(e) => {
+                                setTimingOption(e.target.value);
+                                setErrors(prev => ({ ...prev, timings: "" }));
+                              }}
                               className="w-full h-10 px-3 rounded-md border border-neutral-200 bg-white text-xs sm:text-sm focus:border-brand-500 focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
                             >
                               <option value="Evening (4 PM - 8 PM)">Evening (4 PM - 8 PM)</option>
                               <option value="Late Evening (6 PM - 9 PM)">Late Evening (6 PM - 9 PM)</option>
-                              <option value="Morning (7 AM - 9 AM)">Morning (7 AM - 9 AM)</option>
+                              <option value="Morning (6 AM - 9 AM)">Morning (6 AM - 9 AM)</option>
                               <option value="Weekends Only">Weekends Only</option>
-                              <option value="Flexible timings">Flexible / Any timings</option>
+                              <option value="Flexible timings">Flexible / Any Timings</option>
+                              <option value="Custom Timing">Custom Timing (Specify timing)</option>
                             </select>
+
+                            {timingOption === "Custom Timing" && (
+                              <div className="mt-2 animate-fade-in-up">
+                                <input
+                                  type="text"
+                                  value={customTiming}
+                                  onChange={(e) => {
+                                    setCustomTiming(e.target.value);
+                                    setErrors(prev => ({ ...prev, timings: "" }));
+                                  }}
+                                  placeholder="e.g. 5:00 PM - 7:30 PM"
+                                  className={`w-full h-10 px-3 rounded-lg border bg-white text-xs focus:border-brand-500 focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white ${
+                                    errors.timings ? "border-danger-500 ring-2 ring-danger-500/10" : "border-neutral-200"
+                                  }`}
+                                />
+                                {errors.timings && <p className="text-xs text-danger-500 mt-1">{errors.timings}</p>}
+                              </div>
+                            )}
                           </div>
                         </div>
 

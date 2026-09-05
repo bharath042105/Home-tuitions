@@ -13,4 +13,4 @@ export * from "./Stepper";
 export * from "./Testimonial";
 export * from "./Logo";
 export * from "./ThreeDTilt";
-
+export * from "./WhatsAppWidget";

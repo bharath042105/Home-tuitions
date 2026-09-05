@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import { QueryProvider } from "@/lib/api/query-provider";
 import { ThemeConfigProvider } from "@/lib/theme/theme-config-provider";
 import { ThemeProvider } from "@/lib/theme/theme-provider";
+import { WhatsAppWidget } from "@/components/ui/WhatsAppWidget";
 import "./globals.css";
 
 // Self-hosted at build time (no runtime request to Google, no CSP exception needed)
@@ -24,7 +25,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="bg-white font-sans text-neutral-900 antialiased dark:bg-neutral-950 dark:text-neutral-100">
         <ThemeProvider>
           <ThemeConfigProvider>
-            <QueryProvider>{children}</QueryProvider>
+            <QueryProvider>
+              {children}
+              <WhatsAppWidget />
+            </QueryProvider>
           </ThemeConfigProvider>
         </ThemeProvider>
       </body>

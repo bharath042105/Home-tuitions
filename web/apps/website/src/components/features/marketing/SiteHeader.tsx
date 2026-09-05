@@ -44,11 +44,11 @@ export function SiteHeader() {
           <ThemePresetSwitcher />
           <ThemeToggle />
           <a
-            href="tel:+919059746820"
+            href="tel:+918074470640"
             className="flex items-center gap-2 rounded-md bg-accent-500 px-4 py-2 text-xs font-extrabold text-white hover:bg-accent-600 active:scale-95 transition-all shadow-md shadow-accent-500/10"
           >
             <Phone size={14} className="animate-pulse" />
-            <span>Call Us: +91 90597 46820</span>
+            <span>Call Us: +91 80744 70640</span>
           </a>
         </div>
 
@@ -84,12 +84,12 @@ export function SiteHeader() {
             {/* Mobile Call Block */}
             <div className="border-t border-neutral-100 dark:border-neutral-850 mt-3 pt-4 px-3 flex flex-col gap-3">
               <a
-                href="tel:+919059746820"
+                href="tel:+918074470640"
                 onClick={() => setIsOpen(false)}
                 className="flex items-center justify-center gap-2 rounded-lg bg-accent-500 py-3 text-sm font-extrabold text-white hover:bg-accent-600 transition-all shadow-md"
               >
                 <Phone size={16} />
-                <span>Call Us: +91 90597 46820</span>
+                <span>Call Us: +91 80744 70640</span>
               </a>
               <div className="flex items-center justify-between text-xs text-neutral-500 mt-1">
                 <span>Theme Preset:</span>

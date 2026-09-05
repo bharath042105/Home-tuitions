@@ -26,13 +26,13 @@ export function Logo({ className, showText = true, size = "md" }: LogoProps) {
   return (
     <div className={`flex items-center gap-2.5 select-none ${className || ""}`}>
       {/* Brand Icon Image */}
-      <div className={`relative ${sizeClasses[size].box} shrink-0 overflow-hidden rounded-xl transition-transform duration-300 hover:scale-105 active:scale-95 shadow-md shadow-brand-500/15`}>
+      <div className={`relative ${sizeClasses[size].box} shrink-0 overflow-hidden rounded-2xl border border-brand-500/30 dark:border-brand-400/40 bg-white dark:bg-neutral-900 transition-all duration-300 hover:scale-105 hover:border-brand-500 active:scale-95 shadow-md shadow-brand-500/10`}>
         <Image
           src="/logo.png"
           alt="Vidya Home Tuitions Logo"
           fill
           sizes="64px"
-          className="object-contain"
+          className="object-contain p-0.5"
           priority
         />
       </div>

@@ -70,9 +70,23 @@ export default function ContactPage() {
                   </div>
                   <h3 className="text-lg font-bold text-neutral-900 dark:text-white">Message Sent!</h3>
                   <p className="text-xs text-neutral-500 dark:text-neutral-400 max-w-xs leading-relaxed">
-                    Thank you for reaching out. A matching coordinator has received your message and will contact you shortly.
+                    Thank you for reaching out. A coordinator has received your message and will contact you shortly.
                   </p>
+                  
+                  {/* Direct WhatsApp CTA Button */}
+                  <a
+                    href={`https://wa.me/918074470640?text=${encodeURIComponent(
+                      `Hello Vidya Home Tuitions! My name is ${name} (Phone: ${phone}). Message: "${message}"`
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 rounded-xl bg-emerald-500 px-5 py-2.5 text-xs font-bold text-white shadow-md shadow-emerald-500/20 hover:bg-emerald-600 transition-all active:scale-95"
+                  >
+                    <span>📱 Send Details to WhatsApp Directly</span>
+                  </a>
+
                   <Button
+                    variant="secondary"
                     onClick={() => {
                       setSubmitted(false);
                       setName("");
@@ -80,7 +94,7 @@ export default function ContactPage() {
                       setPhone("");
                       setMessage("");
                     }}
-                    className="mt-2 font-semibold text-xs h-9 px-4"
+                    className="mt-1 font-semibold text-xs h-9 px-4"
                   >
                     Send Another Message
                   </Button>
@@ -157,75 +171,77 @@ export default function ContactPage() {
             </div>
           </div>
 
-          {/* Right Column: Contact Details & Location Pin */}
+          {/* Right Column: Contact Details */}
           <div className="lg:col-span-5 flex flex-col gap-6">
             
             {/* Quick Details */}
-            <div className="rounded-2xl border border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900/60 shadow-sm flex flex-col gap-4">
-              <h2 className="text-lg font-bold text-neutral-900 dark:text-white border-b border-neutral-100 dark:border-neutral-800 pb-2">
-                Our Office Info
+            <div className="rounded-2xl border border-neutral-200 bg-white p-6 sm:p-8 dark:border-neutral-800 dark:bg-neutral-900/60 shadow-lg flex flex-col gap-6">
+              <h2 className="text-lg font-bold text-neutral-900 dark:text-white border-b border-neutral-100 dark:border-neutral-800 pb-3">
+                Our Contact Info
               </h2>
 
               <ul className="flex flex-col gap-4 text-xs sm:text-sm text-neutral-500 dark:text-neutral-400">
-                <li className="flex items-start gap-3">
-                  <Phone size={18} className="text-brand-500 mt-0.5 shrink-0" />
+                <li className="flex items-start gap-3.5">
+                  <Phone size={20} className="text-brand-500 mt-0.5 shrink-0" />
                   <div>
-                    <span className="font-bold text-neutral-800 dark:text-neutral-200 block text-xs">Call or WhatsApp</span>
-                    <a href="tel:+919059746820" className="hover:text-brand-500 text-sm font-semibold transition-colors mt-0.5 block">
-                      +91 90597 46820
+                    <span className="font-bold text-neutral-800 dark:text-neutral-200 block text-xs uppercase tracking-wider">Call or WhatsApp (Primary)</span>
+                    <a href="tel:+918074470640" className="hover:text-brand-500 text-base font-bold text-neutral-900 dark:text-white transition-colors mt-0.5 block">
+                      +91 80744 70640
                     </a>
                   </div>
                 </li>
 
-                <li className="flex items-start gap-3">
-                  <Mail size={18} className="text-brand-500 mt-0.5 shrink-0" />
+                <li className="flex items-start gap-3.5">
+                  <Phone size={20} className="text-accent-500 mt-0.5 shrink-0" />
                   <div>
-                    <span className="font-bold text-neutral-800 dark:text-neutral-200 block text-xs">General Support</span>
-                    <a href="mailto:info@vidyahometuitions.com" className="hover:text-brand-500 text-sm font-semibold transition-colors mt-0.5 block">
-                      info@vidyahometuitions.com
+                    <span className="font-bold text-neutral-800 dark:text-neutral-200 block text-xs uppercase tracking-wider">Call or WhatsApp (Support Desk)</span>
+                    <a href="tel:+916303619089" className="hover:text-brand-500 text-sm font-semibold text-neutral-800 dark:text-neutral-200 transition-colors mt-0.5 block">
+                      +91 63036 19089
                     </a>
                   </div>
                 </li>
 
-                <li className="flex items-start gap-3">
-                  <Clock size={18} className="text-brand-500 mt-0.5 shrink-0" />
+                <li className="flex items-start gap-3.5">
+                  <Phone size={20} className="text-accent-500 mt-0.5 shrink-0" />
                   <div>
-                    <span className="font-bold text-neutral-800 dark:text-neutral-200 block text-xs">Coordinating Hours</span>
-                    <span className="text-xs font-semibold block mt-0.5">
+                    <span className="font-bold text-neutral-800 dark:text-neutral-200 block text-xs uppercase tracking-wider">Call or WhatsApp (Support Desk)</span>
+                    <a href="tel:+918143241349" className="hover:text-brand-500 text-sm font-semibold text-neutral-800 dark:text-neutral-200 transition-colors mt-0.5 block">
+                      +91 81432 41349
+                    </a>
+                  </div>
+                </li>
+
+                <li className="flex items-start gap-3.5">
+                  <Mail size={20} className="text-brand-500 mt-0.5 shrink-0" />
+                  <div>
+                    <span className="font-bold text-neutral-800 dark:text-neutral-200 block text-xs uppercase tracking-wider">General & Academic Support</span>
+                    <a href="mailto:vidyatutorspoint@gmail.com" className="hover:text-brand-500 text-sm font-semibold text-brand-600 dark:text-brand-400 transition-colors mt-0.5 block">
+                      vidyatutorspoint@gmail.com
+                    </a>
+                  </div>
+                </li>
+
+                <li className="flex items-start gap-3.5">
+                  <Clock size={20} className="text-brand-500 mt-0.5 shrink-0" />
+                  <div>
+                    <span className="font-bold text-neutral-800 dark:text-neutral-200 block text-xs uppercase tracking-wider">Coordinating Hours</span>
+                    <span className="text-sm font-semibold text-neutral-800 dark:text-neutral-200 block mt-0.5">
                       Mon - Sun: 9:00 AM - 9:00 PM (IST)
                     </span>
                   </div>
                 </li>
-
-                <li className="flex items-start gap-3">
-                  <MapPin size={18} className="text-brand-500 mt-0.5 shrink-0" />
-                  <div>
-                    <span className="font-bold text-neutral-800 dark:text-neutral-200 block text-xs">Office Address</span>
-                    <span className="text-xs font-semibold block mt-0.5 leading-relaxed">
-                      Jyothi Nagar, Chanda Nagar, Hyderabad, Telangana 500050, India
-                    </span>
-                  </div>
-                </li>
               </ul>
-            </div>
 
-            {/* Stylized Google Map Pin Simulation */}
-            <div className="rounded-2xl border border-neutral-200 bg-neutral-100 p-3 dark:border-neutral-800 dark:bg-neutral-900/60 overflow-hidden shadow-sm flex flex-col gap-2 relative">
-              <div className="h-[200px] w-full bg-neutral-200 dark:bg-neutral-900 rounded-xl relative flex items-center justify-center overflow-hidden border border-neutral-300 dark:border-neutral-800">
-                {/* SVG Mock Map */}
-                <svg className="absolute inset-0 h-full w-full opacity-35 dark:opacity-20" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M0 40h300M0 120h300M0 200h300M80 0v300M180 0v300M260 0v300" stroke="currentColor" strokeWidth="2"/>
-                  <path d="M30 40 L180 120 M120 200 L260 40" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
-                </svg>
-                {/* Ping pointer */}
-                <div className="absolute top-[80px] left-[140px] flex flex-col items-center">
-                  <div className="h-6 w-6 rounded-full bg-brand-500/30 flex items-center justify-center animate-ping absolute" />
-                  <MapPin size={26} className="text-brand-600 fill-white dark:fill-neutral-900 filter drop-shadow-md z-10" />
-                </div>
-              </div>
-              <div className="px-2 py-1">
-                <span className="text-[10px] uppercase tracking-widest font-bold text-brand-600 dark:text-brand-400">Location Map</span>
-                <span className="text-xs font-bold text-neutral-800 dark:text-neutral-100 block">Chanda Nagar, Hyderabad</span>
+              {/* Direct Quick WhatsApp Button */}
+              <div className="pt-2 border-t border-neutral-100 dark:border-neutral-800">
+                <a
+                  href="https://wa.me/918074470640?text=Hello%20Vidya%20Home%20Tuitions!%20I%20would%20like%20to%20inquire%20about%20a%20home%20tutor."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2.5 w-full rounded-xl bg-emerald-500 py-3 text-xs font-bold text-white shadow-md shadow-emerald-500/20 hover:bg-emerald-600 transition-all active:scale-98"
+                >
+                  <span>💬 Chat Directly on WhatsApp</span>
+                </a>
               </div>
             </div>
 

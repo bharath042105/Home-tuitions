@@ -23,30 +23,43 @@ import { leadsApi } from "@/lib/api/leads";
 const STEPS = ["Academic Details", "Tuition Preferences", "Contact Info"];
 
 const CLASS_OPTIONS = [
-  "Nursery - UKG",
-  "Class 1 - 5",
-  "Class 6 - 8",
+  "Nursery / LKG / UKG",
+  "Class 1",
+  "Class 2",
+  "Class 3",
+  "Class 4",
+  "Class 5",
+  "Class 6",
+  "Class 7",
+  "Class 8",
   "Class 9",
   "Class 10 (Board)",
-  "Class 11",
-  "Class 12 (Board)",
-  "IIT-JEE / NEET Prep",
-  "Coding & Languages"
+  "Class 11 (Intermediate / 1st Year)",
+  "Class 12 (Intermediate / 2nd Year)",
+  "IIT-JEE Foundation & Advanced",
+  "NEET / Medical Prep",
+  "Degree / B.Tech / Graduation",
+  "Coding & Languages",
+  "Other / Competitive Exams"
 ];
 
 const BOARD_OPTIONS = ["CBSE", "ICSE / ISC", "SSC (State Board)", "IGCSE / IB", "Other"];
 
 const SUBJECT_OPTIONS = [
+  "ALL Subjects",
   "Mathematics",
   "Physics",
   "Chemistry",
   "Biology",
   "General Science",
-  "Social Science",
+  "Social Studies",
   "English & Grammar",
-  "Hindi / Telugu",
+  "Hindi",
+  "Telugu",
+  "Sanskrit",
   "Computer Science (Python/Java)",
-  "Coding (Scratch/Blockly)"
+  "Coding (Scratch/Blockly)",
+  "Accountancy & Economics"
 ];
 
 function RequestTutorForm() {
@@ -67,7 +80,8 @@ function RequestTutorForm() {
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
   const [tuitionMode, setTuitionMode] = useState("HOME"); // HOME or ONLINE
   const [address, setAddress] = useState("");
-  const [timings, setTimings] = useState("Evening (4 PM - 8 PM)");
+  const [timingOption, setTimingOption] = useState("Evening (4 PM - 8 PM)");
+  const [customTiming, setCustomTiming] = useState("");
   const [frequency, setFrequency] = useState("5 Days a Week");
   const [parentName, setParentName] = useState("");
   const [mobile, setMobile] = useState("");
@@ -85,12 +99,13 @@ function RequestTutorForm() {
     const urlType = searchParams.get("type");
 
     if (urlClass) {
-      if (urlClass === "Nursery-UKG") setGrade("Nursery - UKG");
-      else if (urlClass === "Class 1-5") setGrade("Class 1 - 5");
-      else if (urlClass === "Class 6-8") setGrade("Class 6 - 8");
+      if (urlClass === "Nursery-UKG") setGrade("Nursery / LKG / UKG");
+      else if (urlClass === "Class 1-5") setGrade("Class 5");
+      else if (urlClass === "Class 6-8") setGrade("Class 8");
       else if (urlClass === "Class 9-10") setGrade("Class 10 (Board)");
-      else if (urlClass === "Class 11-12") setGrade("Class 12 (Board)");
-      else if (urlClass === "IIT-JEE/NEET") setGrade("IIT-JEE / NEET Prep");
+      else if (urlClass === "Class 11-12") setGrade("Class 12 (Intermediate / 2nd Year)");
+      else if (urlClass === "IIT-JEE/NEET") setGrade("IIT-JEE Foundation & Advanced");
+      else setGrade(urlClass);
     }
 
     if (urlSubject) {
@@ -104,10 +119,30 @@ function RequestTutorForm() {
 
   // Handle Subject Select
   const toggleSubject = (subject: string) => {
-    setSelectedSubjects((prev) =>
-      prev.includes(subject) ? prev.filter((s) => s !== subject) : [...prev, subject]
-    );
+    if (subject === "ALL Subjects") {
+      if (selectedSubjects.includes("ALL Subjects")) {
+        setSelectedSubjects([]);
+      } else {
+        setSelectedSubjects(["ALL Subjects"]);
+      }
+      setErrors((prev) => ({ ...prev, subjects: "" }));
+      return;
+    }
+
+    setSelectedSubjects((prev) => {
+      const filtered = prev.filter((s) => s !== "ALL Subjects");
+      return filtered.includes(subject)
+        ? filtered.filter((s) => s !== subject)
+        : [...filtered, subject];
+    });
     setErrors((prev) => ({ ...prev, subjects: "" }));
+  };
+
+  const getEffectiveTimings = () => {
+    if (timingOption === "Custom Timing") {
+      return customTiming.trim() || "Custom Timing (Flexible)";
+    }
+    return timingOption;
   };
 
   // Validations
@@ -121,7 +156,9 @@ function RequestTutorForm() {
       if (tuitionMode === "HOME" && !address.trim()) {
         stepErrors.address = "Address is required for in-person home tuition";
       }
-      if (!timings) stepErrors.timings = "Preferred timings are required";
+      if (timingOption === "Custom Timing" && !customTiming.trim()) {
+        stepErrors.timings = "Please enter your custom preferred timing";
+      }
     } else if (activeStep === 2) {
       if (!parentName.trim()) stepErrors.parentName = "Full name is required";
       if (!mobile.trim()) {
@@ -156,7 +193,7 @@ function RequestTutorForm() {
         subjects: selectedSubjects,
         tuitionMode,
         address: tuitionMode === "HOME" ? address : undefined,
-        timings,
+        timings: getEffectiveTimings(),
         frequency,
         parentName,
         mobile,
@@ -168,9 +205,28 @@ function RequestTutorForm() {
   };
 
   if (isSubmitted) {
+    const effectiveTimings = getEffectiveTimings();
+    const whatsappText = `*New Tutor Request Details - Vidya Home Tuitions*\n\n` +
+      `*Parent/Student:* ${parentName}\n` +
+      `*Phone:* +91 ${mobile}\n` +
+      `*Email:* ${email || "Not specified"}\n` +
+      `*Class/Grade:* ${grade}\n` +
+      `*Board:* ${board}\n` +
+      `*Subject(s):* ${selectedSubjects.join(", ")}\n` +
+      `*Mode:* ${tuitionMode === "HOME" ? "Home Tuition" : "Online 1-on-1"}\n` +
+      (tuitionMode === "HOME" && address ? `*Location:* ${address}\n` : "") +
+      `*Timings:* ${effectiveTimings}\n` +
+      `*Frequency:* ${frequency}\n` +
+      `*Budget:* ${budget}\n` +
+      (remarks ? `*Special Notes:* ${remarks}\n` : "") +
+      `\nPlease assist with tutor allocation.`;
+
+    const whatsappUrl = `https://wa.me/918074470640?text=${encodeURIComponent(whatsappText)}`;
+    const emailMailto = `mailto:vidyatutorspoint@gmail.com,info@vidyahometuitions.com?subject=${encodeURIComponent(`New Tutor Request: ${parentName} - ${grade}`)}&body=${encodeURIComponent(whatsappText.replace(/\*/g, ""))}`;
+
     return (
       <div className="min-h-[80vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-neutral-50 dark:bg-neutral-950/20">
-        <div className="max-w-md w-full bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl p-8 shadow-xl text-center flex flex-col items-center gap-6">
+        <div className="max-w-lg w-full bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl p-8 shadow-xl text-center flex flex-col items-center gap-6">
           <div className="h-16 w-16 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shadow-inner animate-bounce">
             <CheckCircle2 size={36} />
           </div>
@@ -186,14 +242,41 @@ function RequestTutorForm() {
               <span className="font-semibold">{grade} - {board}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-neutral-400">Tuition Type:</span>
-              <span className="font-semibold">{tuitionMode === "HOME" ? "Home Tuition" : "Online Live 1-on-1"}</span>
+              <span className="text-neutral-400">Subject(s):</span>
+              <span className="font-semibold text-brand-600 dark:text-brand-400">{selectedSubjects.join(", ")}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-neutral-400">Tuition Type & Timing:</span>
+              <span className="font-semibold">{tuitionMode === "HOME" ? "Home Tuition" : "Online Live 1-on-1"} | {effectiveTimings}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-neutral-400">Contact Number:</span>
               <span className="font-semibold">+91 {mobile}</span>
             </div>
           </div>
+
+          <div className="flex flex-col gap-2.5 w-full">
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold text-sm shadow-md transition-all hover:scale-[1.01]"
+            >
+              <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.664-.698c.983.536 1.83.827 2.796.827 3.182 0 5.768-2.586 5.768-5.766 0-3.18-2.586-5.714-5.768-5.714zm3.385 8.163c-.143.403-.828.74-1.15.787-.323.047-.743.08-2.128-.491-1.63-.672-2.67-2.327-2.752-2.436-.081-.109-.661-.879-.661-1.674 0-.795.419-1.186.568-1.344.15-.157.327-.197.436-.197.109 0 .218.001.314.006.101.005.237-.038.37.284.137.329.467 1.139.508 1.222.041.083.068.181.014.289-.055.109-.082.176-.164.272-.082.096-.173.214-.247.288-.082.082-.168.172-.072.336.096.164.427.705.916 1.141.629.561 1.159.734 1.323.816.164.082.26-.07.356-.179.096-.109.41-.478.52-.642.109-.164.218-.137.368-.082.15.055.956.451 1.12.533.164.082.273.123.314.191.041.069.041.396-.102.8z" />
+              </svg>
+              Chat on WhatsApp with Details
+            </a>
+
+            <a
+              href={emailMailto}
+              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-750 text-neutral-700 dark:text-neutral-200 font-semibold text-xs transition-colors"
+            >
+              <Mail size={15} />
+              Send Email Copy to Admin
+            </a>
+          </div>
+
           <p className="text-xs text-brand-600 dark:text-brand-400 font-semibold bg-brand-50 dark:bg-brand-500/10 px-3 py-1.5 rounded-full flex items-center gap-1.5">
             <Sparkles size={14} />
             Our Academic Expert will call you within 4 hours.
@@ -217,7 +300,7 @@ function RequestTutorForm() {
           <ChevronLeft size={16} />
           Back to Home
         </Link>
-        <span className="text-xs text-neutral-400">Need help? Call +91 90597 46820</span>
+        <span className="text-xs text-neutral-400">Need help? Call +91 80744 70640</span>
       </div>
 
       {/* Card Frame */}
@@ -394,16 +477,38 @@ function RequestTutorForm() {
                     3. Preferred Study Timings <span className="text-danger-500">*</span>
                   </label>
                   <select
-                    value={timings}
-                    onChange={(e) => setTimings(e.target.value)}
+                    value={timingOption}
+                    onChange={(e) => {
+                      setTimingOption(e.target.value);
+                      setErrors((prev) => ({ ...prev, timings: "" }));
+                    }}
                     className="w-full h-11 px-3 rounded-lg border border-neutral-200 bg-white text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
                   >
                     <option value="Evening (4 PM - 8 PM)">Evening (4 PM - 8 PM)</option>
                     <option value="Late Evening (6 PM - 9 PM)">Late Evening (6 PM - 9 PM)</option>
+                    <option value="Morning (6 AM - 9 AM)">Morning (6 AM - 9 AM)</option>
                     <option value="Afternoon (1 PM - 4 PM)">Afternoon (1 PM - 4 PM)</option>
-                    <option value="Morning (7 AM - 9 AM)">Morning (7 AM - 9 AM)</option>
-                    <option value="Weekends Only">Weekends Only</option>
+                    <option value="Weekends Only (Sat & Sun)">Weekends Only (Sat & Sun)</option>
+                    <option value="Custom Timing">Custom Timing (Specify your timing)</option>
                   </select>
+
+                  {timingOption === "Custom Timing" && (
+                    <div className="mt-2.5 animate-fade-in-up">
+                      <input
+                        type="text"
+                        value={customTiming}
+                        onChange={(e) => {
+                          setCustomTiming(e.target.value);
+                          setErrors((prev) => ({ ...prev, timings: "" }));
+                        }}
+                        placeholder="e.g. 5:30 PM - 7:00 PM or Early Morning 6 AM"
+                        className={`w-full h-10 px-3 rounded-lg border bg-white text-xs focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white ${
+                          errors.timings ? "border-danger-500 ring-2 ring-danger-500/10" : "border-neutral-200"
+                        }`}
+                      />
+                      {errors.timings && <p className="text-xs text-danger-500 mt-1">{errors.timings}</p>}
+                    </div>
+                  )}
                 </div>
 
                 <div>

@@ -10,7 +10,8 @@ import org.springframework.stereotype.Service;
  * Dev/test stand-in for a real SMS gateway - logs instead of sending, so local
  * development and CI don't need real provider credentials. Replace with a real
  * provider-backed implementation (behind the same SmsGateway interface) before
- * any non-dev deployment; @Profile ensures this bean is never wired in prod.
+ * any non-dev deployment.
+ */
 @Service
 public class ConsoleSmsGateway implements SmsGateway {
 

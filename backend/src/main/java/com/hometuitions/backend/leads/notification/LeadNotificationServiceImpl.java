@@ -1,5 +1,6 @@
 package com.hometuitions.backend.leads.notification;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hometuitions.backend.leads.entity.ContactMessage;
 import com.hometuitions.backend.leads.entity.TuitionInquiry;
 import com.hometuitions.backend.leads.entity.TutorApplication;
@@ -13,8 +14,12 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-import java.util.List;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
+import java.util.*;
 
 @Service("leadNotificationService")
 public class LeadNotificationServiceImpl implements LeadNotificationService {
@@ -22,6 +27,8 @@ public class LeadNotificationServiceImpl implements LeadNotificationService {
     private static final Logger log = LoggerFactory.getLogger(LeadNotificationServiceImpl.class);
 
     private final JavaMailSender mailSender;
+    private final HttpClient httpClient;
+    private final ObjectMapper objectMapper;
 
     @Value("${app.notification.admin-emails:vidyatutorspoint@gmail.com,sbharathreddy219@gmail.com,bharathreddypvt@gmail.com}")
     private String adminEmailsRaw;
@@ -32,8 +39,18 @@ public class LeadNotificationServiceImpl implements LeadNotificationService {
     @Value("${spring.mail.username:bharathreddypvt@gmail.com}")
     private String mailFrom;
 
+    @Value("${RESEND_API_KEY:${app.resend.api-key:}}")
+    private String resendApiKey;
+
+    @Value("${RESEND_FROM_EMAIL:${app.resend.from-email:Vidya Home Tuitions <onboarding@resend.dev>}}")
+    private String resendFromEmail;
+
     public LeadNotificationServiceImpl(@Autowired(required = false) JavaMailSender mailSender) {
         this.mailSender = mailSender;
+        this.httpClient = HttpClient.newBuilder()
+                .connectTimeout(Duration.ofSeconds(10))
+                .build();
+        this.objectMapper = new ObjectMapper();
     }
 
     @Override
@@ -213,14 +230,24 @@ public class LeadNotificationServiceImpl implements LeadNotificationService {
     }
 
     private void sendEmail(String subject, String plainText, String html) {
-        String fromEmail = (mailFrom != null ? mailFrom.trim().replaceAll("[\"']", "") : "bharathreddypvt@gmail.com");
         List<String> recipients = Arrays.stream(adminEmailsRaw.split(","))
                 .map(String::trim)
                 .map(s -> s.replaceAll("[\"']", ""))
                 .filter(s -> !s.isBlank() && s.contains("@"))
                 .toList();
 
-        log.info("📧 Dispatching lead notification email from [{}] to recipients: {}. Subject: {}", fromEmail, recipients, subject);
+        String cleanResendKey = resendApiKey != null ? resendApiKey.trim().replaceAll("[\"']", "") : "";
+
+        // 🚀 PREFERRED FOR RENDER: Resend HTTPS REST API (Port 443 - Never Blocked)
+        if (!cleanResendKey.isBlank()) {
+            log.info("🚀 Sending email via Resend HTTPS API (Port 443) to: {}", recipients);
+            sendViaResendApi(cleanResendKey, recipients, subject, plainText, html);
+            return;
+        }
+
+        // FALLBACK: Standard JavaMailSender (SMTP)
+        String fromEmail = (mailFrom != null ? mailFrom.trim().replaceAll("[\"']", "") : "bharathreddypvt@gmail.com");
+        log.info("📧 Dispatching lead notification email via SMTP from [{}] to recipients: {}. Subject: {}", fromEmail, recipients, subject);
 
         if (mailSender == null) {
             log.warn("JavaMailSender bean is not present! Notification details:\n{}", plainText);
@@ -240,6 +267,37 @@ public class LeadNotificationServiceImpl implements LeadNotificationService {
             } catch (Exception e) {
                 log.error("❌ Failed to deliver email notification to {}: {}", recipient, e.getMessage(), e);
             }
+        }
+    }
+
+    private void sendViaResendApi(String apiKey, List<String> recipients, String subject, String plainText, String html) {
+        try {
+            Map<String, Object> payload = new HashMap<>();
+            payload.put("from", resendFromEmail != null && !resendFromEmail.isBlank() ? resendFromEmail : "Vidya Home Tuitions <onboarding@resend.dev>");
+            payload.put("to", recipients);
+            payload.put("subject", subject);
+            payload.put("html", html);
+            payload.put("text", plainText);
+
+            String requestBody = objectMapper.writeValueAsString(payload);
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("https://api.resend.com/emails"))
+                    .header("Authorization", "Bearer " + apiKey)
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+                    .timeout(Duration.ofSeconds(15))
+                    .build();
+
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() >= 200 && response.statusCode() < 300) {
+                log.info("✅ Resend API delivery SUCCESS! Response: {}", response.body());
+            } else {
+                log.error("❌ Resend API returned error status {}: {}", response.statusCode(), response.body());
+            }
+        } catch (Exception e) {
+            log.error("❌ Failed to send email via Resend HTTPS API: {}", e.getMessage(), e);
         }
     }
 

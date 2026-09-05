@@ -7,6 +7,7 @@ import com.hometuitions.backend.leads.entity.ContactMessage;
 import com.hometuitions.backend.leads.entity.LeadStatus;
 import com.hometuitions.backend.leads.entity.TuitionInquiry;
 import com.hometuitions.backend.leads.entity.TutorApplication;
+import com.hometuitions.backend.leads.notification.LeadNotificationService;
 import com.hometuitions.backend.leads.repository.ContactMessageRepository;
 import com.hometuitions.backend.leads.repository.TuitionInquiryRepository;
 import com.hometuitions.backend.leads.repository.TutorApplicationRepository;
@@ -27,12 +28,12 @@ public class LeadServiceImpl implements LeadService {
     private final TuitionInquiryRepository tuitionInquiryRepository;
     private final TutorApplicationRepository tutorApplicationRepository;
     private final ContactMessageRepository contactMessageRepository;
-    private final com.hometuitions.backend.common.notification.NotificationService notificationService;
+    private final LeadNotificationService notificationService;
 
     public LeadServiceImpl(TuitionInquiryRepository tuitionInquiryRepository,
                             TutorApplicationRepository tutorApplicationRepository,
                             ContactMessageRepository contactMessageRepository,
-                            com.hometuitions.backend.common.notification.NotificationService notificationService) {
+                            LeadNotificationService notificationService) {
         this.tuitionInquiryRepository = tuitionInquiryRepository;
         this.tutorApplicationRepository = tutorApplicationRepository;
         this.contactMessageRepository = contactMessageRepository;

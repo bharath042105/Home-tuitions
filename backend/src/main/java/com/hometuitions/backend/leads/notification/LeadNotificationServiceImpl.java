@@ -1,4 +1,4 @@
-package com.hometuitions.backend.common.notification;
+package com.hometuitions.backend.leads.notification;
 
 import com.hometuitions.backend.leads.entity.ContactMessage;
 import com.hometuitions.backend.leads.entity.TuitionInquiry;
@@ -13,14 +13,13 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 
-@Service
-public class NotificationServiceImpl implements NotificationService {
+@Service("leadNotificationService")
+public class LeadNotificationServiceImpl implements LeadNotificationService {
 
-    private static final Logger log = LoggerFactory.getLogger(NotificationServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(LeadNotificationServiceImpl.class);
 
     private final JavaMailSender mailSender;
 
@@ -33,7 +32,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Value("${spring.mail.username:bharathreddypvt@gmail.com}")
     private String mailFrom;
 
-    public NotificationServiceImpl(@Autowired(required = false) JavaMailSender mailSender) {
+    public LeadNotificationServiceImpl(@Autowired(required = false) JavaMailSender mailSender) {
         this.mailSender = mailSender;
     }
 

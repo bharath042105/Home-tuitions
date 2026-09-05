@@ -37,12 +37,12 @@ spring:
           auth: true
           starttls:
             enable: true
-            required: false
+            required: true
           ssl:
-            trust: "*"
-          connectiontimeout: 3000
-          timeout: 3000
-          writetimeout: 3000
+            trust: smtp.gmail.com
+          connectiontimeout: 15000
+          timeout: 15000
+          writetimeout: 15000
 
 app:
   jwt:

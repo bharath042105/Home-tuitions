@@ -33,7 +33,13 @@ public class MailConfig {
     public JavaMailSender javaMailSender() {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
         mailSender.setHost(host != null ? host.trim() : "smtp.gmail.com");
-        mailSender.setPort(port > 0 ? port : 587);
+
+        // Force port 587 (STARTTLS) — Render blocks port 465 (SMTPS)
+        int effectivePort = 587;
+        if (port > 0 && port != 465) {
+            effectivePort = port;
+        }
+        mailSender.setPort(effectivePort);
         
         String cleanUsername = username != null ? username.trim().replaceAll("[\"']", "") : "";
         String cleanPassword = rawPassword != null ? rawPassword.trim().replaceAll("[\"']", "").replaceAll("\\s+", "") : "";
@@ -44,23 +50,21 @@ public class MailConfig {
         Properties props = mailSender.getJavaMailProperties();
         props.put("mail.transport.protocol", "smtp");
         props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.ssl.trust", "*");
-        props.put("mail.smtp.connectiontimeout", "8000");
-        props.put("mail.smtp.timeout", "8000");
-        props.put("mail.smtp.writetimeout", "8000");
+        props.put("mail.smtp.ssl.trust", "smtp.gmail.com");
+        props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.smtp.starttls.required", "true");
+
+        // Generous timeouts for cloud environments like Render
+        props.put("mail.smtp.connectiontimeout", "15000");
+        props.put("mail.smtp.timeout", "15000");
+        props.put("mail.smtp.writetimeout", "15000");
+
+        log.info("✅ MailConfig: host={}, port={} (original={}), username={}, passwordConfigured={}", 
+                mailSender.getHost(), effectivePort, port, cleanUsername, !cleanPassword.isBlank());
 
         if (port == 465) {
-            props.put("mail.smtp.ssl.enable", "true");
-            props.put("mail.smtp.socketFactory.port", "465");
-            props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
-            props.put("mail.smtp.socketFactory.fallback", "false");
-        } else {
-            props.put("mail.smtp.starttls.enable", "true");
-            props.put("mail.smtp.starttls.required", "true");
+            log.warn("⚠️ Port 465 was requested but is blocked on Render. Overriding to port 587 (STARTTLS).");
         }
-
-        log.info("Initialized JavaMailSender with host={}, port={}, username={}, passwordConfigured={}", 
-                host, port, cleanUsername, !cleanPassword.isBlank());
 
         return mailSender;
     }

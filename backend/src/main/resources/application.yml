@@ -37,10 +37,12 @@ spring:
           auth: true
           starttls:
             enable: true
-            required: true
-          connectiontimeout: 5000
-          timeout: 5000
-          writetimeout: 5000
+            required: false
+          ssl:
+            trust: "*"
+          connectiontimeout: 3000
+          timeout: 3000
+          writetimeout: 3000
 
 app:
   jwt:
@@ -70,6 +72,8 @@ management:
     health:
       show-details: when-authorized
   health:
+    mail:
+      enabled: false
     redis:
       enabled: false
 

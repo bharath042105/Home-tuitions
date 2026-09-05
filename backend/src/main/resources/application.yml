@@ -19,6 +19,9 @@ spring:
     redis:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      ssl:
+        enabled: ${REDIS_SSL_ENABLED:false}
   servlet:
     multipart:
       max-file-size: 10MB
@@ -48,6 +51,9 @@ management:
   endpoint:
     health:
       show-details: when-authorized
+  health:
+    redis:
+      enabled: false
 
 logging:
   pattern:
@@ -77,3 +83,7 @@ spring:
       on-profile: prod
   jpa:
     show-sql: false
+  data:
+    redis:
+      ssl:
+        enabled: ${REDIS_SSL_ENABLED:true}

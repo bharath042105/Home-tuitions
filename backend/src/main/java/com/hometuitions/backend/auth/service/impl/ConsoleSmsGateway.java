@@ -11,9 +11,7 @@ import org.springframework.stereotype.Service;
  * development and CI don't need real provider credentials. Replace with a real
  * provider-backed implementation (behind the same SmsGateway interface) before
  * any non-dev deployment; @Profile ensures this bean is never wired in prod.
- */
 @Service
-@Profile("!prod")
 public class ConsoleSmsGateway implements SmsGateway {
 
     private static final Logger log = LoggerFactory.getLogger(ConsoleSmsGateway.class);

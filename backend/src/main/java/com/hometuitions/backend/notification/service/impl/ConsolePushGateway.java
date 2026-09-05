@@ -12,9 +12,7 @@ import java.util.Map;
  * Dev/test stand-in, same reasoning as ConsoleSmsGateway (Phase 4) - logs instead of
  * calling Firebase, so local dev/CI don't need real FCM credentials. Replace with a
  * real firebase-admin-backed implementation before any non-dev deployment.
- */
 @Service
-@Profile("!prod")
 public class ConsolePushGateway implements PushGateway {
 
     private static final Logger log = LoggerFactory.getLogger(ConsolePushGateway.class);

@@ -222,32 +222,33 @@ public class LeadNotificationServiceImpl implements LeadNotificationService {
     }
 
     private void sendEmail(String subject, String plainText, String html) {
+        String fromEmail = (mailFrom != null ? mailFrom.trim().replaceAll("[\"']", "") : "bharathreddypvt@gmail.com");
         List<String> recipients = Arrays.stream(adminEmailsRaw.split(","))
                 .map(String::trim)
-                .filter(s -> !s.isBlank())
+                .map(s -> s.replaceAll("[\"']", ""))
+                .filter(s -> !s.isBlank() && s.contains("@"))
                 .toList();
 
-        log.info("Sending lead notification email to recipients: {}. Subject: {}", recipients, subject);
+        log.info("Preparing to send lead notification email from [{}] to recipients: {}. Subject: {}", fromEmail, recipients, subject);
 
         if (mailSender == null) {
-            log.info("JavaMailSender is not configured. Notification details:\n{}", plainText);
+            log.warn("JavaMailSender bean is not present! Notification details:\n{}", plainText);
             return;
         }
 
-        try {
-            for (String recipient : recipients) {
+        for (String recipient : recipients) {
+            try {
                 MimeMessage mimeMessage = mailSender.createMimeMessage();
                 MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
-                helper.setFrom(mailFrom, "Vidya Home Tuitions");
+                helper.setFrom(fromEmail, "Vidya Home Tuitions");
                 helper.setTo(recipient);
                 helper.setSubject(subject);
                 helper.setText(plainText, html);
                 mailSender.send(mimeMessage);
-                log.info("Email notification successfully delivered to: {}", recipient);
+                log.info("✅ Lead notification email successfully delivered to: {}", recipient);
+            } catch (Exception e) {
+                log.error("❌ Failed to deliver email notification to {}: {}", recipient, e.getMessage(), e);
             }
-        } catch (Exception e) {
-            log.warn("Could not dispatch email notification (check SMTP credentials in environment): {}", e.getMessage());
-            log.info("Notification payload:\n{}", plainText);
         }
     }
 

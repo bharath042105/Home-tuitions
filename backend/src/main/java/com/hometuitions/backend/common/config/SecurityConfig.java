@@ -71,7 +71,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable()) // stateless JWT API, no cookies involved
             .cors(Customizer.withDefaults()) // picks up the corsConfigurationSource bean above
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .anonymous(AbstractHttpConfigurer::disable)
+            .anonymous(Customizer.withDefaults())
             .exceptionHandling(ex -> ex.authenticationEntryPoint(unauthorizedEntryPoint()))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()

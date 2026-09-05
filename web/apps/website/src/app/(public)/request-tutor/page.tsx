@@ -255,6 +255,12 @@ function RequestTutorForm() {
             </div>
           </div>
 
+          <div className="w-full bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-800/40 rounded-xl p-3.5 text-center">
+            <p className="text-xs text-emerald-700 dark:text-emerald-300 font-semibold">
+              ✅ Your complete request details have been automatically sent to our academic coordinators.
+            </p>
+          </div>
+
           <div className="flex flex-col gap-2.5 w-full">
             <a
               href={whatsappUrl}
@@ -265,15 +271,7 @@ function RequestTutorForm() {
               <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
                 <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.664-.698c.983.536 1.83.827 2.796.827 3.182 0 5.768-2.586 5.768-5.766 0-3.18-2.586-5.714-5.768-5.714zm3.385 8.163c-.143.403-.828.74-1.15.787-.323.047-.743.08-2.128-.491-1.63-.672-2.67-2.327-2.752-2.436-.081-.109-.661-.879-.661-1.674 0-.795.419-1.186.568-1.344.15-.157.327-.197.436-.197.109 0 .218.001.314.006.101.005.237-.038.37.284.137.329.467 1.139.508 1.222.041.083.068.181.014.289-.055.109-.082.176-.164.272-.082.096-.173.214-.247.288-.082.082-.168.172-.072.336.096.164.427.705.916 1.141.629.561 1.159.734 1.323.816.164.082.26-.07.356-.179.096-.109.41-.478.52-.642.109-.164.218-.137.368-.082.15.055.956.451 1.12.533.164.082.273.123.314.191.041.069.041.396-.102.8z" />
               </svg>
-              Chat on WhatsApp with Details
-            </a>
-
-            <a
-              href={emailMailto}
-              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-750 text-neutral-700 dark:text-neutral-200 font-semibold text-xs transition-colors"
-            >
-              <Mail size={15} />
-              Send Email Copy to Admin
+              Chat on WhatsApp for Instant Support (Optional)
             </a>
           </div>
 

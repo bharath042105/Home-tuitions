@@ -64,4 +64,15 @@ public class MailConfig {
 
         return mailSender;
     }
+
+    @Bean(name = "taskExecutor")
+    public org.springframework.core.task.TaskExecutor taskExecutor() {
+        org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor executor = new org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(2);
+        executor.setMaxPoolSize(10);
+        executor.setQueueCapacity(50);
+        executor.setThreadNamePrefix("LeadNotification-");
+        executor.initialize();
+        return executor;
+    }
 }

@@ -37,188 +37,179 @@ public class LeadNotificationServiceImpl implements LeadNotificationService {
     }
 
     @Override
-    @Async
+    @Async("taskExecutor")
     public void notifyTuitionInquiry(TuitionInquiry inquiry) {
-        String subject = "🔔 New Tutor Request: " + inquiry.getParentName() + " - " + inquiry.getGrade();
-        
-        StringBuilder plainText = new StringBuilder();
-        plainText.append("=== NEW TUITION INQUIRY (VIDYA HOME TUITIONS) ===\n\n");
-        plainText.append("• Parent/Student Name: ").append(inquiry.getParentName()).append("\n");
-        plainText.append("• Mobile Number: +91 ").append(inquiry.getMobile()).append("\n");
-        plainText.append("• Email: ").append(inquiry.getEmail() != null ? inquiry.getEmail() : "N/A").append("\n");
-        plainText.append("• Grade / Class: ").append(inquiry.getGrade()).append("\n");
-        plainText.append("• Board / Syllabus: ").append(inquiry.getBoard()).append("\n");
-        plainText.append("• Subject(s): ").append(inquiry.getSubjects()).append("\n");
-        plainText.append("• Tuition Mode: ").append(inquiry.getTuitionMode()).append("\n");
-        if (inquiry.getAddress() != null && !inquiry.getAddress().isBlank()) {
-            plainText.append("• Address / Locality: ").append(inquiry.getAddress()).append("\n");
-        }
-        plainText.append("• Preferred Timings: ").append(inquiry.getTimings()).append("\n");
-        plainText.append("• Frequency: ").append(inquiry.getFrequency()).append("\n");
-        plainText.append("• Budget Range: ").append(inquiry.getBudget()).append("\n");
-        if (inquiry.getRemarks() != null && !inquiry.getRemarks().isBlank()) {
-            plainText.append("• Special Requirements / Notes: ").append(inquiry.getRemarks()).append("\n");
-        }
-        plainText.append("• Submitted At: ").append(inquiry.getCreatedAt() != null ? inquiry.getCreatedAt().toString() : "Just now").append("\n\n");
-        plainText.append("Admin Portal: https://vidya-admin-iota.vercel.app/leads\n");
+        try {
+            String parent = val(inquiry.getParentName());
+            String grade = val(inquiry.getGrade());
+            String mobile = val(inquiry.getMobile());
+            String email = val(inquiry.getEmail());
+            String board = val(inquiry.getBoard());
+            String subjects = val(inquiry.getSubjects());
+            String mode = val(inquiry.getTuitionMode());
+            String address = val(inquiry.getAddress());
+            String timings = val(inquiry.getTimings());
+            String frequency = val(inquiry.getFrequency());
+            String budget = val(inquiry.getBudget());
+            String remarks = val(inquiry.getRemarks());
 
-        String html = """
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 12px; overflow: hidden; background: #ffffff;">
-                <div style="background: linear-gradient(135deg, #1e40af, #3b82f6); padding: 20px; color: white; text-align: center;">
-                    <h2 style="margin: 0; font-size: 22px;">Vidya Home Tuitions</h2>
-                    <p style="margin: 5px 0 0 0; font-size: 14px; opacity: 0.9;">New Student Tuition Inquiry Received</p>
-                </div>
-                <div style="padding: 24px; color: #333333; line-height: 1.6;">
-                    <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
-                        <tr style="border-bottom: 1px solid #f0f0f0;"><td style="padding: 8px 0; color: #666; width: 40%;">Parent/Student:</td><td style="padding: 8px 0; font-weight: bold;">%s</td></tr>
-                        <tr style="border-bottom: 1px solid #f0f0f0;"><td style="padding: 8px 0; color: #666;">Mobile:</td><td style="padding: 8px 0; font-weight: bold; color: #1e40af;">+91 %s</td></tr>
-                        <tr style="border-bottom: 1px solid #f0f0f0;"><td style="padding: 8px 0; color: #666;">Email:</td><td style="padding: 8px 0;">%s</td></tr>
-                        <tr style="border-bottom: 1px solid #f0f0f0;"><td style="padding: 8px 0; color: #666;">Grade & Board:</td><td style="padding: 8px 0; font-weight: bold;">%s (%s)</td></tr>
-                        <tr style="border-bottom: 1px solid #f0f0f0;"><td style="padding: 8px 0; color: #666;">Subjects:</td><td style="padding: 8px 0; font-weight: bold; color: #d97706;">%s</td></tr>
-                        <tr style="border-bottom: 1px solid #f0f0f0;"><td style="padding: 8px 0; color: #666;">Mode:</td><td style="padding: 8px 0;">%s</td></tr>
-                        <tr style="border-bottom: 1px solid #f0f0f0;"><td style="padding: 8px 0; color: #666;">Address:</td><td style="padding: 8px 0;">%s</td></tr>
-                        <tr style="border-bottom: 1px solid #f0f0f0;"><td style="padding: 8px 0; color: #666;">Timings & Frequency:</td><td style="padding: 8px 0;">%s | %s</td></tr>
-                        <tr style="border-bottom: 1px solid #f0f0f0;"><td style="padding: 8px 0; color: #666;">Budget:</td><td style="padding: 8px 0;">%s</td></tr>
-                        <tr><td style="padding: 8px 0; color: #666;">Remarks:</td><td style="padding: 8px 0;">%s</td></tr>
-                    </table>
-                    <div style="margin-top: 24px; text-align: center;">
-                        <a href="https://vidya-admin-iota.vercel.app/leads" style="background: #1e40af; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">Open Admin Portal</a>
-                    </div>
-                </div>
-            </div>
-            """.formatted(
-                escape(inquiry.getParentName()),
-                escape(inquiry.getMobile()),
-                escape(inquiry.getEmail() != null ? inquiry.getEmail() : "N/A"),
-                escape(inquiry.getGrade()),
-                escape(inquiry.getBoard()),
-                escape(inquiry.getSubjects()),
-                escape(inquiry.getTuitionMode()),
-                escape(inquiry.getAddress() != null ? inquiry.getAddress() : "N/A"),
-                escape(inquiry.getTimings()),
-                escape(inquiry.getFrequency()),
-                escape(inquiry.getBudget()),
-                escape(inquiry.getRemarks() != null ? inquiry.getRemarks() : "None")
-        );
+            String subject = "🔔 New Tutor Request: " + parent + " (" + grade + " - " + subjects + ")";
 
-        sendEmail(subject, plainText.toString(), html);
+            StringBuilder plainText = new StringBuilder();
+            plainText.append("=== NEW TUITION INQUIRY (VIDYA HOME TUITIONS) ===\n\n");
+            plainText.append("• Parent/Student: ").append(parent).append("\n");
+            plainText.append("• Mobile: +91 ").append(mobile).append("\n");
+            plainText.append("• Email: ").append(email).append("\n");
+            plainText.append("• Grade: ").append(grade).append("\n");
+            plainText.append("• Board: ").append(board).append("\n");
+            plainText.append("• Subjects: ").append(subjects).append("\n");
+            plainText.append("• Mode: ").append(mode).append("\n");
+            plainText.append("• Address: ").append(address).append("\n");
+            plainText.append("• Timings & Frequency: ").append(timings).append(" | ").append(frequency).append("\n");
+            plainText.append("• Budget: ").append(budget).append("\n");
+            plainText.append("• Notes: ").append(remarks).append("\n\n");
+            plainText.append("Admin Portal: https://vidya-admin-iota.vercel.app/leads\n");
+
+            String html = "<div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 12px; overflow: hidden; background: #ffffff;\">"
+                    + "<div style=\"background: linear-gradient(135deg, #1e40af, #3b82f6); padding: 20px; color: white; text-align: center;\">"
+                    + "<h2 style=\"margin: 0; font-size: 22px;\">Vidya Home Tuitions</h2>"
+                    + "<p style=\"margin: 5px 0 0 0; font-size: 14px; opacity: 0.9;\">New Student Tuition Inquiry Received</p>"
+                    + "</div>"
+                    + "<div style=\"padding: 24px; color: #333333; line-height: 1.6;\">"
+                    + "<table style=\"width: 100%; border-collapse: collapse; font-size: 14px;\">"
+                    + "<tr style=\"border-bottom: 1px solid #f0f0f0;\"><td style=\"padding: 8px 0; color: #666; width: 35%;\">Parent/Student:</td><td style=\"padding: 8px 0; font-weight: bold;\">" + escape(parent) + "</td></tr>"
+                    + "<tr style=\"border-bottom: 1px solid #f0f0f0;\"><td style=\"padding: 8px 0; color: #666;\">Mobile:</td><td style=\"padding: 8px 0; font-weight: bold; color: #1e40af;\">+91 " + escape(mobile) + "</td></tr>"
+                    + "<tr style=\"border-bottom: 1px solid #f0f0f0;\"><td style=\"padding: 8px 0; color: #666;\">Email:</td><td style=\"padding: 8px 0;\">" + escape(email) + "</td></tr>"
+                    + "<tr style=\"border-bottom: 1px solid #f0f0f0;\"><td style=\"padding: 8px 0; color: #666;\">Grade & Board:</td><td style=\"padding: 8px 0; font-weight: bold;\">" + escape(grade) + " (" + escape(board) + ")</td></tr>"
+                    + "<tr style=\"border-bottom: 1px solid #f0f0f0;\"><td style=\"padding: 8px 0; color: #666;\">Subjects:</td><td style=\"padding: 8px 0; font-weight: bold; color: #d97706;\">" + escape(subjects) + "</td></tr>"
+                    + "<tr style=\"border-bottom: 1px solid #f0f0f0;\"><td style=\"padding: 8px 0; color: #666;\">Mode:</td><td style=\"padding: 8px 0;\">" + escape(mode) + "</td></tr>"
+                    + "<tr style=\"border-bottom: 1px solid #f0f0f0;\"><td style=\"padding: 8px 0; color: #666;\">Address:</td><td style=\"padding: 8px 0;\">" + escape(address) + "</td></tr>"
+                    + "<tr style=\"border-bottom: 1px solid #f0f0f0;\"><td style=\"padding: 8px 0; color: #666;\">Timings:</td><td style=\"padding: 8px 0;\">" + escape(timings) + " (" + escape(frequency) + ")</td></tr>"
+                    + "<tr style=\"border-bottom: 1px solid #f0f0f0;\"><td style=\"padding: 8px 0; color: #666;\">Budget:</td><td style=\"padding: 8px 0;\">" + escape(budget) + "</td></tr>"
+                    + "<tr><td style=\"padding: 8px 0; color: #666;\">Requirements / Notes:</td><td style=\"padding: 8px 0;\">" + escape(remarks) + "</td></tr>"
+                    + "</table>"
+                    + "<div style=\"margin-top: 24px; text-align: center;\">"
+                    + "<a href=\"https://vidya-admin-iota.vercel.app/leads\" style=\"background: #1e40af; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;\">Open Admin Portal</a>"
+                    + "</div>"
+                    + "</div>"
+                    + "</div>";
+
+            sendEmail(subject, plainText.toString(), html);
+        } catch (Exception e) {
+            log.error("Failed to process tuition inquiry notification: {}", e.getMessage(), e);
+        }
     }
 
     @Override
-    @Async
+    @Async("taskExecutor")
     public void notifyTutorApplication(TutorApplication app) {
-        String subject = "👨‍🏫 New Tutor Registration: " + app.getName() + " (" + app.getQualification() + ")";
+        try {
+            String name = val(app.getName());
+            String qualification = val(app.getQualification());
+            String mobile = val(app.getMobile());
+            String whatsapp = val(app.getWhatsapp());
+            String email = val(app.getEmail());
+            String college = val(app.getCollege());
+            String percentage = val(app.getPercentage());
+            String passYear = val(app.getPassYear());
+            String grades = val(app.getGrades());
+            String subjects = val(app.getSubjects());
+            String boards = val(app.getBoards());
+            String localities = val(app.getLocalities());
+            String distance = val(app.getCommuteDistance());
+            String rate = val(app.getExpectedRate());
+            String timings = val(app.getTimings());
+            String bio = val(app.getBio());
 
-        StringBuilder plainText = new StringBuilder();
-        plainText.append("=== NEW TUTOR REGISTRATION (VIDYA HOME TUITIONS) ===\n\n");
-        plainText.append("• Full Name: ").append(app.getName()).append("\n");
-        plainText.append("• Father's Name: ").append(app.getFatherName() != null ? app.getFatherName() : "N/A").append("\n");
-        plainText.append("• Mobile: +91 ").append(app.getMobile()).append("\n");
-        plainText.append("• WhatsApp: +91 ").append(app.getWhatsapp()).append("\n");
-        plainText.append("• Email: ").append(app.getEmail()).append("\n");
-        plainText.append("• Highest Qualification: ").append(app.getQualification()).append(" (").append(app.getPercentage()).append("% - ").append(app.getPassYear()).append(")\n");
-        plainText.append("• College/Univ: ").append(app.getCollege()).append("\n");
-        plainText.append("• 12th/Inter: ").append(app.getInterCollege() != null ? app.getInterCollege() : "N/A").append(" (").append(app.getInterPercentage() != null ? app.getInterPercentage() : "").append(")\n");
-        plainText.append("• 10th School: ").append(app.getSchoolName() != null ? app.getSchoolName() : "N/A").append(" (").append(app.getSchoolPercentage() != null ? app.getSchoolPercentage() : "").append(")\n");
-        plainText.append("• Preferred Localities: ").append(app.getLocalities()).append(" (").append(app.getCommuteDistance()).append(")\n");
-        plainText.append("• Classes/Grades: ").append(app.getGrades()).append("\n");
-        plainText.append("• Subjects: ").append(app.getSubjects()).append("\n");
-        plainText.append("• Target Boards: ").append(app.getBoards()).append("\n");
-        plainText.append("• Mode: ").append(app.getMode()).append(" | Medium: ").append(app.getMedium()).append("\n");
-        plainText.append("• Experience: ").append(app.getExperience()).append(" | Occupation: ").append(app.getOccupation()).append("\n");
-        plainText.append("• Expected Rate: ").append(app.getExpectedRate()).append("\n");
-        plainText.append("• Timings: ").append(app.getTimings()).append("\n");
-        if (app.getBio() != null && !app.getBio().isBlank()) {
-            plainText.append("• Bio / Notes: ").append(app.getBio()).append("\n");
+            String subject = "👨‍🏫 New Tutor Application: " + name + " (" + qualification + " - " + subjects + ")";
+
+            StringBuilder plainText = new StringBuilder();
+            plainText.append("=== NEW TUTOR REGISTRATION (VIDYA HOME TUITIONS) ===\n\n");
+            plainText.append("• Name: ").append(name).append("\n");
+            plainText.append("• Mobile: +91 ").append(mobile).append(" | WhatsApp: +91 ").append(whatsapp).append("\n");
+            plainText.append("• Email: ").append(email).append("\n");
+            plainText.append("• Qualification: ").append(qualification).append(" (").append(percentage).append("% - ").append(passYear).append(")\n");
+            plainText.append("• College: ").append(college).append("\n");
+            plainText.append("• Classes: ").append(grades).append("\n");
+            plainText.append("• Subjects: ").append(subjects).append("\n");
+            plainText.append("• Boards: ").append(boards).append("\n");
+            plainText.append("• Localities: ").append(localities).append(" (").append(distance).append(")\n");
+            plainText.append("• Expected Rate: ").append(rate).append(" | Timings: ").append(timings).append("\n");
+            plainText.append("• Bio: ").append(bio).append("\n\n");
+            plainText.append("Admin Portal: https://vidya-admin-iota.vercel.app/leads\n");
+
+            String html = "<div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 12px; overflow: hidden; background: #ffffff;\">"
+                    + "<div style=\"background: linear-gradient(135deg, #059669, #10b981); padding: 20px; color: white; text-align: center;\">"
+                    + "<h2 style=\"margin: 0; font-size: 22px;\">Vidya Home Tuitions</h2>"
+                    + "<p style=\"margin: 5px 0 0 0; font-size: 14px; opacity: 0.9;\">New Tutor Application Received</p>"
+                    + "</div>"
+                    + "<div style=\"padding: 24px; color: #333333; line-height: 1.6;\">"
+                    + "<table style=\"width: 100%; border-collapse: collapse; font-size: 14px;\">"
+                    + "<tr style=\"border-bottom: 1px solid #f0f0f0;\"><td style=\"padding: 8px 0; color: #666; width: 35%;\">Tutor Name:</td><td style=\"padding: 8px 0; font-weight: bold;\">" + escape(name) + "</td></tr>"
+                    + "<tr style=\"border-bottom: 1px solid #f0f0f0;\"><td style=\"padding: 8px 0; color: #666;\">Contact Numbers:</td><td style=\"padding: 8px 0; font-weight: bold; color: #059669;\">+91 " + escape(mobile) + " / +91 " + escape(whatsapp) + "</td></tr>"
+                    + "<tr style=\"border-bottom: 1px solid #f0f0f0;\"><td style=\"padding: 8px 0; color: #666;\">Email:</td><td style=\"padding: 8px 0;\">" + escape(email) + "</td></tr>"
+                    + "<tr style=\"border-bottom: 1px solid #f0f0f0;\"><td style=\"padding: 8px 0; color: #666;\">Qualification:</td><td style=\"padding: 8px 0; font-weight: bold;\">" + escape(qualification) + " (" + escape(percentage) + "% - " + escape(passYear) + ")</td></tr>"
+                    + "<tr style=\"border-bottom: 1px solid #f0f0f0;\"><td style=\"padding: 8px 0; color: #666;\">College:</td><td style=\"padding: 8px 0;\">" + escape(college) + "</td></tr>"
+                    + "<tr style=\"border-bottom: 1px solid #f0f0f0;\"><td style=\"padding: 8px 0; color: #666;\">Classes:</td><td style=\"padding: 8px 0; font-weight: bold;\">" + escape(grades) + "</td></tr>"
+                    + "<tr style=\"border-bottom: 1px solid #f0f0f0;\"><td style=\"padding: 8px 0; color: #666;\">Subjects:</td><td style=\"padding: 8px 0; font-weight: bold; color: #d97706;\">" + escape(subjects) + "</td></tr>"
+                    + "<tr style=\"border-bottom: 1px solid #f0f0f0;\"><td style=\"padding: 8px 0; color: #666;\">Boards:</td><td style=\"padding: 8px 0;\">" + escape(boards) + "</td></tr>"
+                    + "<tr style=\"border-bottom: 1px solid #f0f0f0;\"><td style=\"padding: 8px 0; color: #666;\">Localities:</td><td style=\"padding: 8px 0;\">" + escape(localities) + " (" + escape(distance) + ")</td></tr>"
+                    + "<tr style=\"border-bottom: 1px solid #f0f0f0;\"><td style=\"padding: 8px 0; color: #666;\">Pay & Timings:</td><td style=\"padding: 8px 0;\">" + escape(rate) + " | " + escape(timings) + "</td></tr>"
+                    + "<tr><td style=\"padding: 8px 0; color: #666;\">Bio:</td><td style=\"padding: 8px 0;\">" + escape(bio) + "</td></tr>"
+                    + "</table>"
+                    + "<div style=\"margin-top: 24px; text-align: center;\">"
+                    + "<a href=\"https://vidya-admin-iota.vercel.app/leads\" style=\"background: #059669; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;\">Review in Admin Portal</a>"
+                    + "</div>"
+                    + "</div>"
+                    + "</div>";
+
+            sendEmail(subject, plainText.toString(), html);
+        } catch (Exception e) {
+            log.error("Failed to process tutor application notification: {}", e.getMessage(), e);
         }
-        plainText.append("\nAdmin Portal: https://vidya-admin-iota.vercel.app/leads\n");
-
-        String html = """
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 12px; overflow: hidden; background: #ffffff;">
-                <div style="background: linear-gradient(135deg, #059669, #10b981); padding: 20px; color: white; text-align: center;">
-                    <h2 style="margin: 0; font-size: 22px;">Vidya Home Tuitions</h2>
-                    <p style="margin: 5px 0 0 0; font-size: 14px; opacity: 0.9;">New Tutor Application Received</p>
-                </div>
-                <div style="padding: 24px; color: #333333; line-height: 1.6;">
-                    <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
-                        <tr style="border-bottom: 1px solid #f0f0f0;"><td style="padding: 8px 0; color: #666; width: 40%;">Tutor Name:</td><td style="padding: 8px 0; font-weight: bold;">%s</td></tr>
-                        <tr style="border-bottom: 1px solid #f0f0f0;"><td style="padding: 8px 0; color: #666;">Mobile & WhatsApp:</td><td style="padding: 8px 0; font-weight: bold; color: #059669;">+91 %s / +91 %s</td></tr>
-                        <tr style="border-bottom: 1px solid #f0f0f0;"><td style="padding: 8px 0; color: #666;">Email:</td><td style="padding: 8px 0;">%s</td></tr>
-                        <tr style="border-bottom: 1px solid #f0f0f0;"><td style="padding: 8px 0; color: #666;">Qualification:</td><td style="padding: 8px 0; font-weight: bold;">%s (%s%% - %s)</td></tr>
-                        <tr style="border-bottom: 1px solid #f0f0f0;"><td style="padding: 8px 0; color: #666;">College:</td><td style="padding: 8px 0;">%s</td></tr>
-                        <tr style="border-bottom: 1px solid #f0f0f0;"><td style="padding: 8px 0; color: #666;">Classes:</td><td style="padding: 8px 0; font-weight: bold;">%s</td></tr>
-                        <tr style="border-bottom: 1px solid #f0f0f0;"><td style="padding: 8px 0; color: #666;">Subjects:</td><td style="padding: 8px 0; font-weight: bold; color: #d97706;">%s</td></tr>
-                        <tr style="border-bottom: 1px solid #f0f0f0;"><td style="padding: 8px 0; color: #666;">Boards:</td><td style="padding: 8px 0;">%s</td></tr>
-                        <tr style="border-bottom: 1px solid #f0f0f0;"><td style="padding: 8px 0; color: #666;">Localities:</td><td style="padding: 8px 0;">%s (%s)</td></tr>
-                        <tr style="border-bottom: 1px solid #f0f0f0;"><td style="padding: 8px 0; color: #666;">Expected Pay & Timings:</td><td style="padding: 8px 0;">%s | %s</td></tr>
-                        <tr><td style="padding: 8px 0; color: #666;">Bio:</td><td style="padding: 8px 0;">%s</td></tr>
-                    </table>
-                    <div style="margin-top: 24px; text-align: center;">
-                        <a href="https://vidya-admin-iota.vercel.app/leads" style="background: #059669; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">Review in Admin Portal</a>
-                    </div>
-                </div>
-            </div>
-            """.formatted(
-                escape(app.getName()),
-                escape(app.getMobile()),
-                escape(app.getWhatsapp()),
-                escape(app.getEmail()),
-                escape(app.getQualification()),
-                escape(app.getPercentage()),
-                escape(app.getPassYear()),
-                escape(app.getCollege()),
-                escape(app.getGrades()),
-                escape(app.getSubjects()),
-                escape(app.getBoards()),
-                escape(app.getLocalities()),
-                escape(app.getCommuteDistance()),
-                escape(app.getExpectedRate()),
-                escape(app.getTimings()),
-                escape(app.getBio() != null ? app.getBio() : "None")
-        );
-
-        sendEmail(subject, plainText.toString(), html);
     }
 
     @Override
-    @Async
+    @Async("taskExecutor")
     public void notifyContactMessage(ContactMessage message) {
-        String subject = "💬 New Contact Message: " + message.getName();
+        try {
+            String name = val(message.getName());
+            String phone = val(message.getPhone());
+            String email = val(message.getEmail());
+            String msg = val(message.getMessage());
 
-        StringBuilder plainText = new StringBuilder();
-        plainText.append("=== NEW CONTACT MESSAGE (VIDYA HOME TUITIONS) ===\n\n");
-        plainText.append("• Sender Name: ").append(message.getName()).append("\n");
-        plainText.append("• Mobile: ").append(message.getPhone()).append("\n");
-        plainText.append("• Email: ").append(message.getEmail() != null ? message.getEmail() : "N/A").append("\n");
-        plainText.append("• Message:\n").append(message.getMessage()).append("\n\n");
-        plainText.append("Admin Portal: https://vidya-admin-iota.vercel.app/leads\n");
+            String subject = "💬 New Contact Message from " + name;
 
-        String html = """
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 12px; overflow: hidden; background: #ffffff;">
-                <div style="background: linear-gradient(135deg, #6366f1, #8b5cf6); padding: 20px; color: white; text-align: center;">
-                    <h2 style="margin: 0; font-size: 22px;">Vidya Home Tuitions</h2>
-                    <p style="margin: 5px 0 0 0; font-size: 14px; opacity: 0.9;">New Contact Message Received</p>
-                </div>
-                <div style="padding: 24px; color: #333333; line-height: 1.6;">
-                    <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
-                        <tr style="border-bottom: 1px solid #f0f0f0;"><td style="padding: 8px 0; color: #666; width: 30%;">Name:</td><td style="padding: 8px 0; font-weight: bold;">%s</td></tr>
-                        <tr style="border-bottom: 1px solid #f0f0f0;"><td style="padding: 8px 0; color: #666;">Phone:</td><td style="padding: 8px 0; font-weight: bold; color: #6366f1;">%s</td></tr>
-                        <tr style="border-bottom: 1px solid #f0f0f0;"><td style="padding: 8px 0; color: #666;">Email:</td><td style="padding: 8px 0;">%s</td></tr>
-                        <tr><td style="padding: 8px 0; color: #666; vertical-align: top;">Message:</td><td style="padding: 8px 0; white-space: pre-wrap;">%s</td></tr>
-                    </table>
-                    <div style="margin-top: 24px; text-align: center;">
-                        <a href="https://vidya-admin-iota.vercel.app/leads" style="background: #6366f1; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">View in Admin Portal</a>
-                    </div>
-                </div>
-            </div>
-            """.formatted(
-                escape(message.getName()),
-                escape(message.getPhone()),
-                escape(message.getEmail() != null ? message.getEmail() : "N/A"),
-                escape(message.getMessage())
-        );
+            StringBuilder plainText = new StringBuilder();
+            plainText.append("=== NEW CONTACT MESSAGE (VIDYA HOME TUITIONS) ===\n\n");
+            plainText.append("• Sender Name: ").append(name).append("\n");
+            plainText.append("• Mobile: +91 ").append(phone).append("\n");
+            plainText.append("• Email: ").append(email).append("\n");
+            plainText.append("• Message:\n").append(msg).append("\n\n");
+            plainText.append("Admin Portal: https://vidya-admin-iota.vercel.app/leads\n");
 
-        sendEmail(subject, plainText.toString(), html);
+            String html = "<div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 12px; overflow: hidden; background: #ffffff;\">"
+                    + "<div style=\"background: linear-gradient(135deg, #6366f1, #8b5cf6); padding: 20px; color: white; text-align: center;\">"
+                    + "<h2 style=\"margin: 0; font-size: 22px;\">Vidya Home Tuitions</h2>"
+                    + "<p style=\"margin: 5px 0 0 0; font-size: 14px; opacity: 0.9;\">New Contact Message Received</p>"
+                    + "</div>"
+                    + "<div style=\"padding: 24px; color: #333333; line-height: 1.6;\">"
+                    + "<table style=\"width: 100%; border-collapse: collapse; font-size: 14px;\">"
+                    + "<tr style=\"border-bottom: 1px solid #f0f0f0;\"><td style=\"padding: 8px 0; color: #666; width: 30%;\">Name:</td><td style=\"padding: 8px 0; font-weight: bold;\">" + escape(name) + "</td></tr>"
+                    + "<tr style=\"border-bottom: 1px solid #f0f0f0;\"><td style=\"padding: 8px 0; color: #666;\">Phone:</td><td style=\"padding: 8px 0; font-weight: bold; color: #6366f1;\">+91 " + escape(phone) + "</td></tr>"
+                    + "<tr style=\"border-bottom: 1px solid #f0f0f0;\"><td style=\"padding: 8px 0; color: #666;\">Email:</td><td style=\"padding: 8px 0;\">" + escape(email) + "</td></tr>"
+                    + "<tr><td style=\"padding: 8px 0; color: #666; vertical-align: top;\">Message:</td><td style=\"padding: 8px 0; white-space: pre-wrap;\">" + escape(msg) + "</td></tr>"
+                    + "</table>"
+                    + "<div style=\"margin-top: 24px; text-align: center;\">"
+                    + "<a href=\"https://vidya-admin-iota.vercel.app/leads\" style=\"background: #6366f1; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;\">View in Admin Portal</a>"
+                    + "</div>"
+                    + "</div>"
+                    + "</div>";
+
+            sendEmail(subject, plainText.toString(), html);
+        } catch (Exception e) {
+            log.error("Failed to process contact message notification: {}", e.getMessage(), e);
+        }
     }
 
     private void sendEmail(String subject, String plainText, String html) {
@@ -229,7 +220,7 @@ public class LeadNotificationServiceImpl implements LeadNotificationService {
                 .filter(s -> !s.isBlank() && s.contains("@"))
                 .toList();
 
-        log.info("Preparing to send lead notification email from [{}] to recipients: {}. Subject: {}", fromEmail, recipients, subject);
+        log.info("📧 Dispatching lead notification email from [{}] to recipients: {}. Subject: {}", fromEmail, recipients, subject);
 
         if (mailSender == null) {
             log.warn("JavaMailSender bean is not present! Notification details:\n{}", plainText);
@@ -250,6 +241,10 @@ public class LeadNotificationServiceImpl implements LeadNotificationService {
                 log.error("❌ Failed to deliver email notification to {}: {}", recipient, e.getMessage(), e);
             }
         }
+    }
+
+    private static String val(String s) {
+        return (s == null || s.isBlank()) ? "N/A" : s.trim();
     }
 
     private static String escape(String s) {

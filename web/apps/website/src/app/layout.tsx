@@ -10,8 +10,12 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  title: "Home Tuitions - Find Verified Tutors Online & Offline",
+  title: "Vidya Home Tuitions - Find Verified Tutors Online & Offline",
   description: "Book verified tutors for online and in-person home tuition.",
+  icons: {
+    icon: "/logo.png",
+    apple: "/logo.png",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

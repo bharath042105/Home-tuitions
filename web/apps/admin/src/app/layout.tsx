@@ -4,8 +4,12 @@ import { AppProviders } from "@/lib/api/app-providers";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Home Tuitions Admin",
-  description: "Operations dashboard for the Home Tuitions marketplace",
+  title: "Vidya Home Tuitions - Admin Portal",
+  description: "Operations dashboard for Vidya Home Tuitions marketplace",
+  icons: {
+    icon: "/logo.png",
+    apple: "/logo.png",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -18,6 +18,7 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useColorMode } from "@/lib/theme/color-mode-context";
@@ -25,7 +26,7 @@ import { useThemePreset } from "@/lib/theme/theme-preset-context";
 import { isLoggedIn, setTokens } from "@/lib/api/client";
 
 const NAV_ITEMS = [
-  { href: "/dashboard",     label: "Dashboard",          icon: LayoutDashboard },
+  { href: "/dashboard",     label: "Dashboard",           icon: LayoutDashboard },
   { href: "/verifications", label: "Tutor Verifications", icon: ShieldCheck },
   { href: "/users",         label: "Users",               icon: Users },
   { href: "/bookings",      label: "Bookings",            icon: CalendarCheck },
@@ -36,26 +37,15 @@ const NAV_ITEMS = [
 function VidyaLogo({ collapsed }: { collapsed: boolean }) {
   return (
     <div className={`flex items-center gap-2.5 select-none overflow-hidden transition-all duration-300 ${collapsed ? "justify-center" : ""}`}>
-      <div className="relative h-9 w-9 shrink-0">
-        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-full w-full drop-shadow-[0_2px_8px_rgba(37,99,235,0.2)]">
-          <defs>
-            <linearGradient id="admin-brand" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#2563EB" />
-              <stop offset="100%" stopColor="#1E40AF" />
-            </linearGradient>
-            <linearGradient id="admin-accent" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#FDE047" />
-              <stop offset="100%" stopColor="#D97706" />
-            </linearGradient>
-          </defs>
-          <path d="M50 5 C75 5, 90 12, 90 40 C90 70, 70 90, 50 95 C30 90, 10 70, 10 40 C10 12, 25 5, 50 5 Z" fill="url(#admin-brand)" />
-          <path d="M50 12 C68 12, 80 18, 80 40 C80 63, 65 80, 50 85 C35 80, 20 63, 20 40 C20 18, 32 12, 50 12 Z" fill="#FFFFFF" className="dark:fill-neutral-900" />
-          <path d="M50 60 C46 56, 36 53, 30 55 V34 C36 32, 46 35, 50 38 M50 60 C54 56, 64 53, 70 55 V34 C64 32, 54 35, 50 38" stroke="url(#admin-brand)" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" />
-          <path d="M50 35 C50 35, 57 27, 57 21 C57 15, 50 12, 50 12 C50 12, 43 15, 43 21 C43 27, 50 35, 50 35 Z" fill="url(#admin-accent)" />
-          <path d="M50 31 C50 31, 54 26, 54 22 C54 18, 50 16, 50 16 C50 16, 46 18, 46 22 C46 26, 50 31, 50 31 Z" fill="#FFFFFF" opacity="0.8" />
-          <path d="M50 68 L50 78" stroke="url(#admin-accent)" strokeWidth="4" strokeLinecap="round" />
-          <circle cx="50" cy="80" r="4.5" fill="url(#admin-accent)" />
-        </svg>
+      <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-xl shadow-sm">
+        <Image
+          src="/logo.png"
+          alt="Vidya Logo"
+          fill
+          sizes="36px"
+          className="object-contain"
+          priority
+        />
       </div>
       {!collapsed && (
         <div className="flex flex-col leading-none">

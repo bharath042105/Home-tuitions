@@ -27,13 +27,16 @@ public class LeadServiceImpl implements LeadService {
     private final TuitionInquiryRepository tuitionInquiryRepository;
     private final TutorApplicationRepository tutorApplicationRepository;
     private final ContactMessageRepository contactMessageRepository;
+    private final com.hometuitions.backend.common.notification.NotificationService notificationService;
 
     public LeadServiceImpl(TuitionInquiryRepository tuitionInquiryRepository,
                             TutorApplicationRepository tutorApplicationRepository,
-                            ContactMessageRepository contactMessageRepository) {
+                            ContactMessageRepository contactMessageRepository,
+                            com.hometuitions.backend.common.notification.NotificationService notificationService) {
         this.tuitionInquiryRepository = tuitionInquiryRepository;
         this.tutorApplicationRepository = tutorApplicationRepository;
         this.contactMessageRepository = contactMessageRepository;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -51,7 +54,13 @@ public class LeadServiceImpl implements LeadService {
         inquiry.setEmail(request.email());
         inquiry.setBudget(request.budget());
         inquiry.setRemarks(request.remarks());
-        return tuitionInquiryRepository.save(inquiry);
+        TuitionInquiry saved = tuitionInquiryRepository.save(inquiry);
+        if (notificationService != null) {
+            try {
+                notificationService.notifyTuitionInquiry(saved);
+            } catch (Exception ignored) {}
+        }
+        return saved;
     }
 
     @Override
@@ -96,7 +105,13 @@ public class LeadServiceImpl implements LeadService {
         application.setExpectedRate(request.expectedRate());
         application.setTimings(request.timings());
         application.setBio(request.bio());
-        return tutorApplicationRepository.save(application);
+        TutorApplication saved = tutorApplicationRepository.save(application);
+        if (notificationService != null) {
+            try {
+                notificationService.notifyTutorApplication(saved);
+            } catch (Exception ignored) {}
+        }
+        return saved;
     }
 
     @Override
@@ -119,7 +134,13 @@ public class LeadServiceImpl implements LeadService {
         contactMessage.setPhone(request.phone());
         contactMessage.setEmail(request.email());
         contactMessage.setMessage(request.message());
-        return contactMessageRepository.save(contactMessage);
+        ContactMessage saved = contactMessageRepository.save(contactMessage);
+        if (notificationService != null) {
+            try {
+                notificationService.notifyContactMessage(saved);
+            } catch (Exception ignored) {}
+        }
+        return saved;
     }
 
     @Override

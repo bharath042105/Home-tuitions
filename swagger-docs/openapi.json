@@ -1,0 +1,888 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Home Tuitions API",
+    "version": "1.0.0",
+    "description": "Enterprise-grade REST API for the Home Tuitions marketplace connecting students/parents with verified expert tutors.\n\n### Authentication\nAll protected endpoints require a valid JWT Bearer Token in the `Authorization` header:\n`Authorization: Bearer <your_jwt_token>`\n\nRate limiting headers and device identification (`X-Device-Id`) are supported across sensitive authentication routes.",
+    "contact": {
+      "name": "Home Tuitions Engineering Team",
+      "url": "https://github.com/bharath042105/Home-tuitions"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "Local Development Server"
+    },
+    {
+      "url": "https://api.hometuitions.example.com",
+      "description": "Production Server"
+    }
+  ],
+  "tags": [
+    { "name": "Authentication", "description": "User registration, login, OTP verification, token refresh, and session management" },
+    { "name": "Admin - Users", "description": "Administrative user management and role assignment" },
+    { "name": "Admin - Analytics", "description": "Platform analytics, business metrics, and revenue reporting" },
+    { "name": "Admin - Bookings", "description": "Administrative booking oversight and status overrides" },
+    { "name": "Admin - Disputes", "description": "Dispute arbitration between parents/students and tutors" },
+    { "name": "Admin - Leads", "description": "Lead lifecycle management and assignment" },
+    { "name": "Admin - Verifications", "description": "Tutor identity, document, and background check verification" },
+    { "name": "Admin - Support Tickets", "description": "Helpdesk and ticket resolution dashboard" },
+    { "name": "Tutors", "description": "Tutor profiles, subject expertise, and qualifications" },
+    { "name": "Tutor Availability", "description": "Tutor slot management and recurring availability schedules" },
+    { "name": "Tutor Documents", "description": "Document upload for identity and degree verification" },
+    { "name": "Students", "description": "Student profiles, learning preferences, and grade levels" },
+    { "name": "Parents", "description": "Parent profiles and linked student accounts" },
+    { "name": "Discovery", "description": "Tutor search, geo-filtering, subject matching, and pricing filters" },
+    { "name": "Leads", "description": "Tuition inquiries, quote generation, and lead conversions" },
+    { "name": "Bookings", "description": "Tuition class bookings, scheduling, confirmations, and cancellations" },
+    { "name": "Classroom & Attendance", "description": "Class session check-in, attendance tracking, and completion sign-off" },
+    { "name": "Payments & Orders", "description": "Razorpay order creation, payment verification, and transaction history" },
+    { "name": "Webhooks", "description": "Payment gateway webhooks for asynchronous transaction updates" },
+    { "name": "Chat", "description": "In-app real-time messaging between students/parents and tutors" },
+    { "name": "Notifications", "description": "User notifications, read state management, and push alerts" },
+    { "name": "Support", "description": "Customer support ticket creation and user-side issue tracking" },
+    { "name": "Health", "description": "Service health checks and liveness probes" }
+  ],
+  "paths": {
+    "/api/v1/auth/register": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Register a new user",
+        "description": "Creates a new user account with role `PARENT`, `STUDENT`, or `TUTOR`.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/RegisterRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "User successfully registered" },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "409": { "$ref": "#/components/responses/Conflict" },
+          "429": { "$ref": "#/components/responses/RateLimited" }
+        }
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Login with email and password",
+        "parameters": [
+          {
+            "name": "X-Device-Id",
+            "in": "header",
+            "required": true,
+            "schema": { "type": "string" },
+            "example": "browser-chrome-12345"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LoginRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Authentication successful",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/TokenResponse" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "429": { "$ref": "#/components/responses/RateLimited" }
+        }
+      }
+    },
+    "/api/v1/auth/otp/request": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Request an OTP for phone-based login",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/OtpRequestRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "OTP sent successfully" },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "429": { "$ref": "#/components/responses/RateLimited" }
+        }
+      }
+    },
+    "/api/v1/auth/otp/verify": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Verify OTP and obtain JWT tokens",
+        "parameters": [
+          {
+            "name": "X-Device-Id",
+            "in": "header",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/OtpVerifyRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OTP verified successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/TokenResponse" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/api/v1/auth/refresh": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Refresh expired access token",
+        "parameters": [
+          { "name": "refreshToken", "in": "query", "required": true, "schema": { "type": "string" } },
+          { "name": "X-Device-Id", "in": "header", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "New access and refresh token pair",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/TokenResponse" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/api/v1/auth/logout": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Logout current session",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "X-Device-Id", "in": "header", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "204": { "description": "Successfully logged out" },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/api/v1/tutors/search": {
+      "get": {
+        "tags": ["Discovery"],
+        "summary": "Search and filter tutors",
+        "parameters": [
+          { "name": "subject", "in": "query", "schema": { "type": "string" }, "description": "Subject name or keyword" },
+          { "name": "gradeLevel", "in": "query", "schema": { "type": "string" } },
+          { "name": "minRating", "in": "query", "schema": { "type": "number", "format": "float" } },
+          { "name": "maxHourlyRate", "in": "query", "schema": { "type": "number" } },
+          { "name": "lat", "in": "query", "schema": { "type": "number" }, "description": "User latitude" },
+          { "name": "lng", "in": "query", "schema": { "type": "number" }, "description": "User longitude" },
+          { "name": "radiusKm", "in": "query", "schema": { "type": "number", "default": 10 } },
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 0 } },
+          { "name": "size", "in": "query", "schema": { "type": "integer", "default": 20 } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of matching tutors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "content": { "type": "array", "items": { "$ref": "#/components/schemas/TutorSearchCard" } },
+                    "totalElements": { "type": "integer" },
+                    "totalPages": { "type": "integer" },
+                    "number": { "type": "integer" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tutors/{id}": {
+      "get": {
+        "tags": ["Tutors"],
+        "summary": "Get tutor profile by ID",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Full tutor details",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/TutorProfileResponse" } }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
+    },
+    "/api/v1/tutors/me/availability": {
+      "get": {
+        "tags": ["Tutor Availability"],
+        "summary": "Get tutor's weekly availability schedule",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Weekly schedule slots",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/AvailabilitySlotResponse" } }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["Tutor Availability"],
+        "summary": "Update tutor weekly availability",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "type": "array", "items": { "$ref": "#/components/schemas/AvailabilitySlotRequest" } }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Availability updated successfully" },
+          "400": { "$ref": "#/components/responses/BadRequest" }
+        }
+      }
+    },
+    "/api/v1/tutors/me/documents": {
+      "get": {
+        "tags": ["Tutor Documents"],
+        "summary": "List uploaded verification documents",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "List of tutor verification documents",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/TutorDocumentResponse" } }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Tutor Documents"],
+        "summary": "Upload a verification document",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "documentType": { "type": "string", "enum": ["ID_CARD", "DEGREE_CERTIFICATE", "CRIMINAL_CHECK", "EXPERIENCE_LETTER"] },
+                  "file": { "type": "string", "format": "binary" }
+                },
+                "required": ["documentType", "file"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Document uploaded successfully" }
+        }
+      }
+    },
+    "/api/v1/leads": {
+      "post": {
+        "tags": ["Leads"],
+        "summary": "Submit a tuition inquiry / lead",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/CreateLeadRequest" } }
+          }
+        },
+        "responses": {
+          "201": { "description": "Lead created successfully" }
+        }
+      },
+      "get": {
+        "tags": ["Leads"],
+        "summary": "Get user's tuition leads",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "List of user leads",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/LeadResponse" } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/bookings": {
+      "post": {
+        "tags": ["Bookings"],
+        "summary": "Create a new tuition booking",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/CreateBookingRequest" } }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Booking initiated",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/BookingResponse" } } }
+          }
+        }
+      },
+      "get": {
+        "tags": ["Bookings"],
+        "summary": "List bookings for authenticated user",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "status", "in": "query", "schema": { "type": "string", "enum": ["PENDING", "CONFIRMED", "ACTIVE", "COMPLETED", "CANCELLED"] } }
+        ],
+        "responses": {
+          "200": {
+            "description": "User bookings",
+            "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/BookingResponse" } } } }
+          }
+        }
+      }
+    },
+    "/api/v1/bookings/{bookingId}/payment-order": {
+      "post": {
+        "tags": ["Payments & Orders"],
+        "summary": "Create Razorpay Payment Order for a booking",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "bookingId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Razorpay order details with key and orderId",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PaymentOrderResponse" } } }
+          }
+        }
+      }
+    },
+    "/api/v1/webhooks/razorpay": {
+      "post": {
+        "tags": ["Webhooks"],
+        "summary": "Razorpay payment webhook callback",
+        "parameters": [
+          { "name": "X-Razorpay-Signature", "in": "header", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "type": "object" } } }
+        },
+        "responses": {
+          "200": { "description": "Webhook processed" }
+        }
+      }
+    },
+    "/api/v1/bookings/{bookingId}/attendance": {
+      "get": {
+        "tags": ["Classroom & Attendance"],
+        "summary": "Get session attendance logs",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "bookingId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Attendance history",
+            "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/AttendanceResponse" } } } }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Classroom & Attendance"],
+        "summary": "Mark session attendance",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "bookingId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/MarkAttendanceRequest" } } }
+        },
+        "responses": {
+          "200": { "description": "Attendance marked" }
+        }
+      }
+    },
+    "/api/v1/bookings/{bookingId}/chat": {
+      "get": {
+        "tags": ["Chat"],
+        "summary": "Get booking chat history",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "bookingId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 0 } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Chat message history",
+            "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/ChatMessageResponse" } } } }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Chat"],
+        "summary": "Send a chat message",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "bookingId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SendChatMessageRequest" } } }
+        },
+        "responses": {
+          "201": { "description": "Message sent", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ChatMessageResponse" } } } }
+        }
+      }
+    },
+    "/api/v1/notifications/me": {
+      "get": {
+        "tags": ["Notifications"],
+        "summary": "Fetch user notifications",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Notification feed",
+            "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/NotificationResponse" } } } }
+          }
+        }
+      }
+    },
+    "/api/v1/tickets": {
+      "post": {
+        "tags": ["Support"],
+        "summary": "Create a customer support ticket",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CreateTicketRequest" } } }
+        },
+        "responses": {
+          "201": { "description": "Ticket submitted", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/TicketResponse" } } } }
+        }
+      },
+      "get": {
+        "tags": ["Support"],
+        "summary": "Get user support tickets",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "User ticket list",
+            "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/TicketResponse" } } } }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/analytics": {
+      "get": {
+        "tags": ["Admin - Analytics"],
+        "summary": "Retrieve high-level business analytics and platform KPI overview",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Platform KPI dashboard data",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AdminAnalyticsOverviewResponse" } } }
+          },
+          "403": { "$ref": "#/components/responses/Forbidden" }
+        }
+      }
+    },
+    "/api/v1/admin/verifications": {
+      "get": {
+        "tags": ["Admin - Verifications"],
+        "summary": "List pending tutor verifications",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Pending tutor verification requests",
+            "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/AdminVerificationSummary" } } } }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/verifications/{tutorId}/decision": {
+      "post": {
+        "tags": ["Admin - Verifications"],
+        "summary": "Approve or reject tutor verification",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "tutorId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/VerificationDecisionRequest" } } }
+        },
+        "responses": {
+          "200": { "description": "Verification status updated" }
+        }
+      }
+    },
+    "/api/v1/admin/disputes": {
+      "get": {
+        "tags": ["Admin - Disputes"],
+        "summary": "List active disputes",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Dispute cases",
+            "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/DisputeResponse" } } } }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": ["Health"],
+        "summary": "Application health check",
+        "responses": {
+          "200": {
+            "description": "Service is operational",
+            "content": {
+              "application/json": {
+                "example": { "status": "UP", "timestamp": "2026-09-06T12:00:00Z" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Enter your JWT token."
+      }
+    },
+    "schemas": {
+      "RegisterRequest": {
+        "type": "object",
+        "required": ["email", "password", "fullName", "phone", "role"],
+        "properties": {
+          "email": { "type": "string", "format": "email", "example": "parent@example.com" },
+          "password": { "type": "string", "format": "password", "minLength": 8, "example": "SecurePass123!" },
+          "fullName": { "type": "string", "example": "Rajesh Sharma" },
+          "phone": { "type": "string", "pattern": "^[0-9]{10}$", "example": "9876543210" },
+          "role": { "type": "string", "enum": ["PARENT", "STUDENT", "TUTOR"], "example": "PARENT" }
+        }
+      },
+      "LoginRequest": {
+        "type": "object",
+        "required": ["email", "password"],
+        "properties": {
+          "email": { "type": "string", "format": "email", "example": "user@example.com" },
+          "password": { "type": "string", "format": "password", "example": "Secret123!" }
+        }
+      },
+      "OtpRequestRequest": {
+        "type": "object",
+        "required": ["phone"],
+        "properties": {
+          "phone": { "type": "string", "example": "9876543210" }
+        }
+      },
+      "OtpVerifyRequest": {
+        "type": "object",
+        "required": ["phone", "code"],
+        "properties": {
+          "phone": { "type": "string", "example": "9876543210" },
+          "code": { "type": "string", "example": "481920" }
+        }
+      },
+      "TokenResponse": {
+        "type": "object",
+        "properties": {
+          "accessToken": { "type": "string", "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." },
+          "refreshToken": { "type": "string", "example": "dGhpc0lzQVJlZnJlc2hUb2tlbg..." },
+          "tokenType": { "type": "string", "example": "Bearer" },
+          "expiresIn": { "type": "integer", "example": 3600 },
+          "role": { "type": "string", "example": "PARENT" }
+        }
+      },
+      "TutorSearchCard": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "fullName": { "type": "string", "example": "Dr. Ananya Roy" },
+          "avatarUrl": { "type": "string", "example": "https://images.example.com/avatar.jpg" },
+          "subjects": { "type": "array", "items": { "type": "string" }, "example": ["Mathematics", "Physics"] },
+          "hourlyRate": { "type": "number", "example": 750.0 },
+          "rating": { "type": "number", "format": "float", "example": 4.9 },
+          "totalReviews": { "type": "integer", "example": 38 },
+          "isVerified": { "type": "boolean", "example": true },
+          "distanceKm": { "type": "number", "example": 3.4 }
+        }
+      },
+      "TutorProfileResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "fullName": { "type": "string" },
+          "bio": { "type": "string" },
+          "qualifications": { "type": "array", "items": { "type": "string" } },
+          "hourlyRate": { "type": "number" },
+          "subjects": { "type": "array", "items": { "type": "string" } },
+          "verificationStatus": { "type": "string", "enum": ["PENDING", "APPROVED", "REJECTED"] },
+          "experienceYears": { "type": "integer" }
+        }
+      },
+      "AvailabilitySlotResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "dayOfWeek": { "type": "string", "enum": ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"] },
+          "startTime": { "type": "string", "example": "16:00" },
+          "endTime": { "type": "string", "example": "19:00" },
+          "isBooked": { "type": "boolean" }
+        }
+      },
+      "AvailabilitySlotRequest": {
+        "type": "object",
+        "required": ["dayOfWeek", "startTime", "endTime"],
+        "properties": {
+          "dayOfWeek": { "type": "string", "enum": ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"] },
+          "startTime": { "type": "string", "example": "16:00" },
+          "endTime": { "type": "string", "example": "19:00" }
+        }
+      },
+      "TutorDocumentResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "documentType": { "type": "string" },
+          "fileUrl": { "type": "string" },
+          "verificationStatus": { "type": "string", "enum": ["PENDING", "APPROVED", "REJECTED"] },
+          "uploadedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "CreateLeadRequest": {
+        "type": "object",
+        "required": ["subject", "gradeLevel", "address", "preferredSchedule"],
+        "properties": {
+          "subject": { "type": "string", "example": "Grade 10 ICSE Physics" },
+          "gradeLevel": { "type": "string", "example": "Grade 10" },
+          "address": { "type": "string", "example": "HSR Layout, Bangalore" },
+          "preferredSchedule": { "type": "string", "example": "Weekday Evenings" },
+          "budgetMax": { "type": "number", "example": 1000.0 }
+        }
+      },
+      "LeadResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "subject": { "type": "string" },
+          "status": { "type": "string", "enum": ["NEW", "ASSIGNED", "CONTACTED", "CONVERTED", "CLOSED"] },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "CreateBookingRequest": {
+        "type": "object",
+        "required": ["tutorId", "subject", "startTime", "endTime", "totalSessions"],
+        "properties": {
+          "tutorId": { "type": "string", "format": "uuid" },
+          "subject": { "type": "string" },
+          "startTime": { "type": "string", "format": "date-time" },
+          "endTime": { "type": "string", "format": "date-time" },
+          "totalSessions": { "type": "integer", "example": 12 }
+        }
+      },
+      "BookingResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "tutorId": { "type": "string", "format": "uuid" },
+          "studentId": { "type": "string", "format": "uuid" },
+          "status": { "type": "string", "enum": ["PENDING", "CONFIRMED", "ACTIVE", "COMPLETED", "CANCELLED"] },
+          "amount": { "type": "number", "example": 9000.0 },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "PaymentOrderResponse": {
+        "type": "object",
+        "properties": {
+          "orderId": { "type": "string", "example": "order_EK9d8sj2kL1" },
+          "amount": { "type": "integer", "example": 900000 },
+          "currency": { "type": "string", "example": "INR" },
+          "razorpayKeyId": { "type": "string", "example": "rzp_test_xxxx" }
+        }
+      },
+      "AttendanceResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "sessionDate": { "type": "string", "format": "date-time" },
+          "status": { "type": "string", "enum": ["PRESENT", "ABSENT", "CANCELLED"] },
+          "topicsCovered": { "type": "string" }
+        }
+      },
+      "MarkAttendanceRequest": {
+        "type": "object",
+        "required": ["sessionDate", "status"],
+        "properties": {
+          "sessionDate": { "type": "string", "format": "date-time" },
+          "status": { "type": "string", "enum": ["PRESENT", "ABSENT"] },
+          "topicsCovered": { "type": "string", "example": "Quadratic Equations and Problem Solving" }
+        }
+      },
+      "ChatMessageResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "senderId": { "type": "string", "format": "uuid" },
+          "content": { "type": "string" },
+          "sentAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "SendChatMessageRequest": {
+        "type": "object",
+        "required": ["content"],
+        "properties": {
+          "content": { "type": "string", "example": "Hello, see you at 4:00 PM for today's session." }
+        }
+      },
+      "NotificationResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "title": { "type": "string" },
+          "message": { "type": "string" },
+          "isRead": { "type": "boolean" },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "CreateTicketRequest": {
+        "type": "object",
+        "required": ["subject", "description", "category"],
+        "properties": {
+          "subject": { "type": "string", "example": "Rescheduling request issue" },
+          "description": { "type": "string", "example": "Unable to modify session slot for Friday" },
+          "category": { "type": "string", "enum": ["BILLING", "BOOKING", "TUTOR_ISSUE", "TECHNICAL", "OTHER"] }
+        }
+      },
+      "TicketResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "subject": { "type": "string" },
+          "status": { "type": "string", "enum": ["OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED"] },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "AdminAnalyticsOverviewResponse": {
+        "type": "object",
+        "properties": {
+          "totalUsers": { "type": "integer", "example": 1420 },
+          "activeTutors": { "type": "integer", "example": 210 },
+          "totalBookings": { "type": "integer", "example": 3840 },
+          "monthlyGrossRevenue": { "type": "number", "example": 450000.0 },
+          "disputeCount": { "type": "integer", "example": 3 }
+        }
+      },
+      "AdminVerificationSummary": {
+        "type": "object",
+        "properties": {
+          "tutorId": { "type": "string", "format": "uuid" },
+          "tutorName": { "type": "string" },
+          "submittedAt": { "type": "string", "format": "date-time" },
+          "pendingDocumentCount": { "type": "integer" }
+        }
+      },
+      "VerificationDecisionRequest": {
+        "type": "object",
+        "required": ["decision"],
+        "properties": {
+          "decision": { "type": "string", "enum": ["APPROVE", "REJECT"] },
+          "feedback": { "type": "string", "example": "All credentials and degree certificates verified." }
+        }
+      },
+      "DisputeResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "bookingId": { "type": "string", "format": "uuid" },
+          "raisedBy": { "type": "string" },
+          "reason": { "type": "string" },
+          "status": { "type": "string", "enum": ["OPEN", "INVESTIGATING", "RESOLVED_REFUND", "RESOLVED_DISMISSED"] }
+        }
+      },
+      "ApiError": {
+        "type": "object",
+        "properties": {
+          "timestamp": { "type": "string", "format": "date-time" },
+          "status": { "type": "integer", "example": 400 },
+          "error": { "type": "string", "example": "Bad Request" },
+          "message": { "type": "string", "example": "Invalid input parameters" },
+          "path": { "type": "string", "example": "/api/v1/auth/login" }
+        }
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "Invalid input or validation error",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+      },
+      "Unauthorized": {
+        "description": "Authentication token missing, expired, or invalid",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+      },
+      "Forbidden": {
+        "description": "User lacks permissions for this resource",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+      },
+      "NotFound": {
+        "description": "Resource not found",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+      },
+      "Conflict": {
+        "description": "Resource conflict (e.g. email or phone already registered)",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+      },
+      "RateLimited": {
+        "description": "Too many requests. Rate limit exceeded.",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+      }
+    }
+  }
+}

@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home Tuitions API Documentation</title>
+  <meta name="description" content="Interactive OpenAPI & Swagger API Reference for the Home Tuitions Platform">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236366f1'><path d='M12 2L1 7l11 5 9-4.09V17h2V7L12 2zm0 13.5l-8-3.64V17c0 3.31 3.58 6 8 6s8-2.69 8-6v-5.14l-8 3.64z'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.18.2/swagger-ui.css" />
+  
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --primary-light: #eef2ff;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --radius: 12px;
+      --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0b0f19;
+      --card-bg: #111827;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #1f2937;
+      --primary-light: #1e1b4b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      -webkit-font-smoothing: antialiased;
+      transition: background-color 0.25s ease, color 0.25s ease;
+    }
+
+    /* Top Brand Navigation */
+    .top-header {
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05);
+    }
+
+    .header-container {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 0.875rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .logo-badge {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    }
+
+    .logo-badge svg {
+      width: 22px;
+      height: 22px;
+      fill: currentColor;
+    }
+
+    .brand-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .version-pill {
+      font-size: 0.7rem;
+      font-weight: 700;
+      background: var(--primary-light);
+      color: var(--primary);
+      padding: 0.15rem 0.5rem;
+      border-radius: 9999px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.45rem 0.85rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--card-bg);
+      color: var(--text);
+      transition: all 0.15s ease;
+      font-family: inherit;
+    }
+
+    .nav-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .nav-btn.primary {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+      box-shadow: 0 2px 6px rgba(79, 70, 229, 0.25);
+    }
+
+    .nav-btn.primary:hover {
+      background: var(--primary-hover);
+    }
+
+    .theme-toggle-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--card-bg);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .theme-toggle-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    /* Main Container */
+    #swagger-ui-container {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
+
+    /* Overriding Swagger UI Defaults for Clean Modern UI */
+    .swagger-ui {
+      font-family: var(--font-sans) !important;
+    }
+
+    .swagger-ui .topbar {
+      display: none !important;
+    }
+
+    .swagger-ui .info {
+      margin: 1.5rem 0 2rem 0 !important;
+      background: var(--card-bg);
+      padding: 2rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.04);
+    }
+
+    .swagger-ui .info .title {
+      font-family: var(--font-sans) !important;
+      font-weight: 800 !important;
+      letter-spacing: -0.03em !important;
+      color: var(--text) !important;
+    }
+
+    .swagger-ui .info p, .swagger-ui .info li {
+      font-family: var(--font-sans) !important;
+      color: var(--text-muted) !important;
+    }
+
+    .swagger-ui .scheme-container {
+      background: var(--card-bg) !important;
+      box-shadow: none !important;
+      border: 1px solid var(--border) !important;
+      border-radius: var(--radius) !important;
+      padding: 1rem 1.5rem !important;
+      margin-bottom: 2rem !important;
+    }
+
+    .swagger-ui .opblock-tag {
+      font-family: var(--font-sans) !important;
+      font-weight: 700 !important;
+      color: var(--text) !important;
+      border-bottom: 1px solid var(--border) !important;
+    }
+
+    .swagger-ui .opblock {
+      border-radius: 10px !important;
+      box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.03) !important;
+      margin-bottom: 1rem !important;
+    }
+
+    .swagger-ui .btn.authorize {
+      border-color: var(--primary) !important;
+      color: var(--primary) !important;
+      border-radius: 8px !important;
+      font-weight: 700 !important;
+    }
+
+    .swagger-ui .btn.authorize svg {
+      fill: var(--primary) !important;
+    }
+
+    .swagger-ui input[type=text], .swagger-ui textarea, .swagger-ui select {
+      border-radius: 6px !important;
+      font-family: var(--font-sans) !important;
+    }
+
+    .swagger-ui code, .swagger-ui .model, .swagger-ui .highlight-code {
+      font-family: var(--font-mono) !important;
+    }
+
+    /* Dark Mode specific tweaks for Swagger UI */
+    [data-theme="dark"] .swagger-ui {
+      filter: invert(88%) hue-rotate(180deg);
+    }
+    [data-theme="dark"] .swagger-ui img,
+    [data-theme="dark"] .swagger-ui svg {
+      filter: invert(100%) hue-rotate(180deg);
+    }
+
+    /* Footer */
+    .docs-footer {
+      border-top: 1px solid var(--border);
+      background: var(--card-bg);
+      padding: 2rem 1.5rem;
+      text-align: center;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-top: 3rem;
+    }
+
+    .docs-footer a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .docs-footer a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 640px) {
+      .header-container {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .header-actions {
+        width: 100%;
+        justify-content: space-between;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="top-header">
+    <div class="header-container">
+      <div class="brand-section">
+        <div class="logo-badge">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 2L1 7l11 5 9-4.09V17h2V7L12 2zm0 13.5l-8-3.64V17c0 3.31 3.58 6 8 6s8-2.69 8-6v-5.14l-8 3.64z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="brand-title">
+            Home Tuitions API
+            <span class="version-pill">v1.0.0</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <a href="./openapi.json" target="_blank" download="openapi.json" class="nav-btn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          OpenAPI JSON
+        </a>
+
+        <a href="https://github.com/bharath042105/Home-tuitions" target="_blank" rel="noopener noreferrer" class="nav-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+          </svg>
+          GitHub
+        </a>
+
+        <button class="theme-toggle-btn" id="themeToggleBtn" title="Toggle dark/light theme" aria-label="Toggle theme">
+          <svg id="themeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Swagger UI Root -->
+  <main id="swagger-ui-container">
+    <div id="swagger-ui"></div>
+  </main>
+
+  <footer class="docs-footer">
+    <p>© 2026 Home Tuitions API Ecosystem • Built with OpenAPI 3.0 & Swagger UI • <a href="https://github.com/bharath042105/Home-tuitions" target="_blank">Repository</a></p>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="https://unpkg.com/swagger-ui-dist@5.18.2/swagger-ui-bundle.js"></script>
+  <script src="https://unpkg.com/swagger-ui-dist@5.18.2/swagger-ui-standalone-preset.js"></script>
+  <script>
+    // Theme Management
+    const themeBtn = document.getElementById('themeToggleBtn');
+    const themeIcon = document.getElementById('themeIcon');
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    
+    function applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('theme', theme);
+      if (theme === 'dark') {
+        themeIcon.innerHTML = `<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>`;
+      } else {
+        themeIcon.innerHTML = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>`;
+      }
+    }
+
+    applyTheme(savedTheme);
+
+    themeBtn.addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+      applyTheme(currentTheme === 'dark' ? 'light' : 'dark');
+    });
+
+    // Initialize Swagger UI
+    window.onload = function() {
+      window.ui = SwaggerUIBundle({
+        url: "./openapi.json",
+        dom_id: '#swagger-ui',
+        deepLinking: true,
+        presets: [
+          SwaggerUIBundle.presets.apis,
+          SwaggerUIStandalonePreset
+        ],
+        plugins: [
+          SwaggerUIBundle.plugins.DownloadUrl
+        ],
+        layout: "StandaloneLayout",
+        defaultModelsExpandDepth: 2,
+        defaultModelExpandDepth: 2,
+        displayRequestDuration: true,
+        filter: true,
+        persistAuthorization: true,
+        tryItOutEnabled: true
+      });
+    };
+  </script>
+</body>
+</html>

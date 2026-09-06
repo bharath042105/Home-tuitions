@@ -26,3 +26,4 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./swagger-docs
           force_orphan: true
+          commit_message: "deploy: update swagger docs [skip ci] [skip vercel]"

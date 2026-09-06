@@ -48,10 +48,10 @@ export const tutorApplicationSchema = z.object({
   expectedRate: z.string().min(1, "Expected rate is required").max(50),
   timings: z.string().max(100).optional(),
   bio: z.string().max(5000).optional(),
-  photoUrl: z.string().max(2000).optional(),
-  aadhaarUrl: z.string().max(2000).optional(),
-  degreeUrl: z.string().max(2000).optional(),
-  resumeUrl: z.string().max(2000).optional(),
+  photoUrl: z.string().optional().or(z.literal("")),
+  aadhaarUrl: z.string().optional().or(z.literal("")),
+  degreeUrl: z.string().optional().or(z.literal("")),
+  resumeUrl: z.string().optional().or(z.literal("")),
 });
 export type TutorApplicationInput = z.infer<typeof tutorApplicationSchema>;
 

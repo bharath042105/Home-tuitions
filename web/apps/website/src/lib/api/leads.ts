@@ -27,11 +27,36 @@ export const leadsApi = {
     }),
 
   /**
-   * Uploads a file by first requesting a presigned URL, PUT-ing the file directly to S3 / Cloudflare R2,
-   * and returning the persistent public/download URL.
-   * If presigned upload is unavailable or fails, gracefully falls back to a base64 data URL.
+   * Uploads a file by first posting to backend /api/v1/leads/upload-file,
+   * with fallback to S3 presigned PUT and local base64.
    */
   uploadDocumentFile: async (file: File, documentType?: string): Promise<string> => {
+    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080";
+
+    // 1. Direct multipart upload to backend (stores in DB/S3 and returns permanent public URL)
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      if (documentType) {
+        formData.append("documentType", documentType);
+      }
+
+      const response = await fetch(`${baseUrl}/api/v1/leads/upload-file`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (response.ok) {
+        const data = (await response.json()) as LeadUploadUrlResponse;
+        if (data.publicUrl) {
+          return data.publicUrl;
+        }
+      }
+    } catch (err) {
+      console.warn("Direct upload-file failed, trying presigned upload fallback:", err);
+    }
+
+    // 2. Presigned URL fallback
     try {
       const res = await leadsApi.getUploadUrl(file.name, file.type || "application/octet-stream", documentType);
       if (res && res.uploadUrl && res.publicUrl) {
@@ -51,7 +76,7 @@ export const leadsApi = {
       console.warn("Presigned S3/R2 upload failed, falling back to data URL encoding:", e);
     }
 
-    // Client-side fallback to base64 Data URL (ensures tutor document is always preserved)
+    // 3. Client-side fallback to base64 Data URL
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => resolve(reader.result as string);

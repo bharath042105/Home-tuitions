@@ -35,9 +35,9 @@ public record SubmitTutorApplicationRequest(
         @NotBlank(message = "Expected rate is required") @Size(max = 50) String expectedRate,
         @Size(max = 100) String timings,
         @Size(max = 5000) String bio,
-        @Size(max = 2000) String photoUrl,
-        @Size(max = 2000) String aadhaarUrl,
-        @Size(max = 2000) String degreeUrl,
-        @Size(max = 2000) String resumeUrl
+        String photoUrl,
+        String aadhaarUrl,
+        String degreeUrl,
+        String resumeUrl
 ) {
 }

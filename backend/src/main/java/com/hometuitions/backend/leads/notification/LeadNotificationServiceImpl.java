@@ -138,10 +138,15 @@ public class LeadNotificationServiceImpl implements LeadNotificationService {
             String timings = val(app.getTimings());
             String bio = val(app.getBio());
 
-            String photoUrl = val(app.getPhotoUrl());
-            String aadhaarUrl = val(app.getAadhaarUrl());
-            String degreeUrl = val(app.getDegreeUrl());
-            String resumeUrl = val(app.getResumeUrl());
+            String photoUrl = app.getPhotoUrl();
+            String aadhaarUrl = app.getAadhaarUrl();
+            String degreeUrl = app.getDegreeUrl();
+            String resumeUrl = app.getResumeUrl();
+
+            boolean hasPhoto = isValidDocUrl(photoUrl);
+            boolean hasAadhaar = isValidDocUrl(aadhaarUrl);
+            boolean hasDegree = isValidDocUrl(degreeUrl);
+            boolean hasResume = isValidDocUrl(resumeUrl);
 
             String subject = "👨‍🏫 New Tutor Application: " + name + " (" + qualification + " - " + subjects + ")";
 
@@ -158,20 +163,24 @@ public class LeadNotificationServiceImpl implements LeadNotificationService {
             plainText.append("• Localities: ").append(localities).append(" (").append(distance).append(")\n");
             plainText.append("• Expected Rate: ").append(rate).append(" | Timings: ").append(timings).append("\n");
             plainText.append("• Bio: ").append(bio).append("\n\n");
-            plainText.append("=== ATTACHED DOCUMENTS ===\n");
-            if (!"-".equals(photoUrl)) plainText.append("• Photo: ").append(photoUrl).append("\n");
-            if (!"-".equals(aadhaarUrl)) plainText.append("• Aadhaar Card: ").append(aadhaarUrl).append("\n");
-            if (!"-".equals(degreeUrl)) plainText.append("• Degree Certificate: ").append(degreeUrl).append("\n");
-            if (!"-".equals(resumeUrl)) plainText.append("• Resume / CV: ").append(resumeUrl).append("\n");
-            plainText.append("\nAdmin Portal: https://vidya-admin-iota.vercel.app/leads\n");
+            
+            if (hasPhoto || hasAadhaar || hasDegree || hasResume) {
+                plainText.append("=== ATTACHED DOCUMENTS ===\n");
+                if (hasPhoto) plainText.append("• Photo: ").append(photoUrl).append("\n");
+                if (hasAadhaar) plainText.append("• Aadhaar Card: ").append(aadhaarUrl).append("\n");
+                if (hasDegree) plainText.append("• Degree Certificate: ").append(degreeUrl).append("\n");
+                if (hasResume) plainText.append("• Resume / CV: ").append(resumeUrl).append("\n");
+                plainText.append("\n");
+            }
+            plainText.append("Admin Portal: https://vidya-admin-iota.vercel.app/leads\n");
 
             StringBuilder docsHtml = new StringBuilder();
-            if (!"-".equals(photoUrl) || !"-".equals(aadhaarUrl) || !"-".equals(degreeUrl) || !"-".equals(resumeUrl)) {
+            if (hasPhoto || hasAadhaar || hasDegree || hasResume) {
                 docsHtml.append("<tr style=\"border-bottom: 1px solid #f0f0f0;\"><td style=\"padding: 8px 0; color: #666; font-weight: bold;\">Submitted Documents:</td><td style=\"padding: 8px 0;\">");
-                if (!"-".equals(photoUrl)) docsHtml.append("<a href=\"").append(escape(photoUrl)).append("\" target=\"_blank\" style=\"color: #059669; font-weight: bold; margin-right: 12px; text-decoration: underline;\">📷 Profile Photo</a> ");
-                if (!"-".equals(aadhaarUrl)) docsHtml.append("<a href=\"").append(escape(aadhaarUrl)).append("\" target=\"_blank\" style=\"color: #059669; font-weight: bold; margin-right: 12px; text-decoration: underline;\">🪪 Aadhaar Card</a> ");
-                if (!"-".equals(degreeUrl)) docsHtml.append("<a href=\"").append(escape(degreeUrl)).append("\" target=\"_blank\" style=\"color: #059669; font-weight: bold; margin-right: 12px; text-decoration: underline;\">🎓 Degree Cert</a> ");
-                if (!"-".equals(resumeUrl)) docsHtml.append("<a href=\"").append(escape(resumeUrl)).append("\" target=\"_blank\" style=\"color: #059669; font-weight: bold; text-decoration: underline;\">📄 Resume</a>");
+                if (hasPhoto) docsHtml.append("<a href=\"").append(escape(photoUrl)).append("\" target=\"_blank\" style=\"color: #059669; font-weight: bold; margin-right: 12px; text-decoration: underline;\">📷 Profile Photo</a> ");
+                if (hasAadhaar) docsHtml.append("<a href=\"").append(escape(aadhaarUrl)).append("\" target=\"_blank\" style=\"color: #059669; font-weight: bold; margin-right: 12px; text-decoration: underline;\">🪪 Aadhaar Card</a> ");
+                if (hasDegree) docsHtml.append("<a href=\"").append(escape(degreeUrl)).append("\" target=\"_blank\" style=\"color: #059669; font-weight: bold; margin-right: 12px; text-decoration: underline;\">🎓 Degree Cert</a> ");
+                if (hasResume) docsHtml.append("<a href=\"").append(escape(resumeUrl)).append("\" target=\"_blank\" style=\"color: #059669; font-weight: bold; text-decoration: underline;\">📄 Resume</a>");
                 docsHtml.append("</td></tr>");
             }
 
@@ -381,6 +390,14 @@ public class LeadNotificationServiceImpl implements LeadNotificationService {
 
     private static String val(String s) {
         return (s == null || s.isBlank()) ? "N/A" : s.trim();
+    }
+
+    private static boolean isValidDocUrl(String url) {
+        if (url == null || url.isBlank()) return false;
+        String trimmed = url.trim();
+        return !trimmed.equalsIgnoreCase("N/A")
+                && !trimmed.equals("-")
+                && (trimmed.startsWith("http://") || trimmed.startsWith("https://") || trimmed.startsWith("data:"));
     }
 
     private static String escape(String s) {

@@ -250,11 +250,20 @@ function TutorApplicationsTab() {
 
   const rows = data?.content ?? [];
 
-  const getTutorWhatsappText = (tutor: TutorApplicationDto) => {
-    let text = `*Tutor Application Details - Vidya Home Tuitions*\n\n` +
+  const isDocValid = (url?: string | null): boolean => {
+    if (!url) return false;
+    const trimmed = url.trim();
+    return trimmed !== "N/A" && trimmed !== "-" && (trimmed.startsWith("http://") || trimmed.startsWith("https://") || trimmed.startsWith("data:"));
+  };
+
+  function getTutorWhatsappText(tutor: TutorApplicationDto): string {
+    let text =
+      `*TUTOR APPLICATION - VIDYA HOME TUITIONS*\n\n` +
       `*Name:* ${tutor.name}\n` +
+      (tutor.fatherName ? `*Father's Name:* ${tutor.fatherName}\n` : "") +
       `*Mobile:* +91 ${tutor.mobile}\n` +
       `*WhatsApp:* +91 ${tutor.whatsapp}\n` +
+      (tutor.alternativePhone ? `*Alternative Phone:* +91 ${tutor.alternativePhone}\n` : "") +
       `*Email:* ${tutor.email}\n` +
       `*Qualification:* ${tutor.qualification} (${tutor.percentage}% - ${tutor.passYear})\n` +
       `*College:* ${tutor.college}\n` +
@@ -268,17 +277,18 @@ function TutorApplicationsTab() {
       `*Timings:* ${tutor.timings}\n` +
       (tutor.bio ? `*Bio:* ${tutor.bio}\n` : "");
 
-    if (tutor.photoUrl || tutor.aadhaarUrl || tutor.degreeUrl || tutor.resumeUrl) {
+    const hasDocs = isDocValid(tutor.photoUrl) || isDocValid(tutor.aadhaarUrl) || isDocValid(tutor.degreeUrl) || isDocValid(tutor.resumeUrl);
+    if (hasDocs) {
       text += `\n*Attached Documents:*\n`;
-      if (tutor.photoUrl) text += `• Photo: ${tutor.photoUrl}\n`;
-      if (tutor.aadhaarUrl) text += `• Aadhaar: ${tutor.aadhaarUrl}\n`;
-      if (tutor.degreeUrl) text += `• Degree: ${tutor.degreeUrl}\n`;
-      if (tutor.resumeUrl) text += `• Resume: ${tutor.resumeUrl}\n`;
+      if (isDocValid(tutor.photoUrl)) text += `• Photo: ${tutor.photoUrl}\n`;
+      if (isDocValid(tutor.aadhaarUrl)) text += `• Aadhaar: ${tutor.aadhaarUrl}\n`;
+      if (isDocValid(tutor.degreeUrl)) text += `• Degree: ${tutor.degreeUrl}\n`;
+      if (isDocValid(tutor.resumeUrl)) text += `• Resume: ${tutor.resumeUrl}\n`;
     }
 
     text += `\n*Status:* ${tutor.status}`;
     return text;
-  };
+  }
 
   return (
     <>
@@ -310,56 +320,58 @@ function TutorApplicationsTab() {
                 </TableCell>
                 <TableCell>
                   <Stack direction="row" spacing={0.5}>
-                    {row.photoUrl && (
+                    {isDocValid(row.photoUrl) && (
                       <Chip
                         size="small"
                         label="Photo"
                         color="primary"
                         variant="outlined"
                         component="a"
-                        href={row.photoUrl}
+                        href={row.photoUrl!}
                         target="_blank"
                         clickable
                       />
                     )}
-                    {row.aadhaarUrl && (
+                    {isDocValid(row.aadhaarUrl) && (
                       <Chip
                         size="small"
                         label="Aadhaar"
                         color="success"
                         variant="outlined"
                         component="a"
-                        href={row.aadhaarUrl}
+                        href={row.aadhaarUrl!}
                         target="_blank"
                         clickable
                       />
                     )}
-                    {row.degreeUrl && (
+                    {isDocValid(row.degreeUrl) && (
                       <Chip
                         size="small"
                         label="Degree"
                         color="info"
                         variant="outlined"
                         component="a"
-                        href={row.degreeUrl}
+                        href={row.degreeUrl!}
                         target="_blank"
                         clickable
                       />
                     )}
-                    {row.resumeUrl && (
+                    {isDocValid(row.resumeUrl) && (
                       <Chip
                         size="small"
                         label="Resume"
                         color="warning"
                         variant="outlined"
                         component="a"
-                        href={row.resumeUrl}
+                        href={row.resumeUrl!}
                         target="_blank"
                         clickable
                       />
                     )}
-                    {!row.photoUrl && !row.aadhaarUrl && !row.degreeUrl && !row.resumeUrl && (
-                      <Typography variant="caption" color="text.secondary">None</Typography>
+                    {!isDocValid(row.photoUrl) && !isDocValid(row.aadhaarUrl) && !isDocValid(row.degreeUrl) && !isDocValid(row.resumeUrl) && (
+                      <Typography variant="caption" sx={{ color: "text.secondary", fontStyle: "italic" }}>
+                        None
+                      </Typography>
                     )}
                   </Stack>
                 </TableCell>
@@ -425,7 +437,7 @@ function TutorApplicationsTab() {
                 📎 Attached Verification Documents:
               </Typography>
               <Grid container spacing={2}>
-                {selectedTutor.photoUrl ? (
+                {isDocValid(selectedTutor.photoUrl) && (
                   <Grid item xs={12} sm={6} md={3}>
                     <Paper variant="outlined" sx={{ p: 1.5, textAlign: "center" }}>
                       <Typography variant="caption" sx={{ fontWeight: 700, display: "block", mb: 1 }}>Profile Photo</Typography>
@@ -434,7 +446,7 @@ function TutorApplicationsTab() {
                         variant="contained"
                         color="primary"
                         component="a"
-                        href={selectedTutor.photoUrl}
+                        href={selectedTutor.photoUrl!}
                         target="_blank"
                         fullWidth
                       >
@@ -442,9 +454,9 @@ function TutorApplicationsTab() {
                       </Button>
                     </Paper>
                   </Grid>
-                ) : null}
+                )}
 
-                {selectedTutor.aadhaarUrl ? (
+                {isDocValid(selectedTutor.aadhaarUrl) && (
                   <Grid item xs={12} sm={6} md={3}>
                     <Paper variant="outlined" sx={{ p: 1.5, textAlign: "center" }}>
                       <Typography variant="caption" sx={{ fontWeight: 700, display: "block", mb: 1 }}>Aadhaar Card</Typography>
@@ -453,7 +465,7 @@ function TutorApplicationsTab() {
                         variant="contained"
                         color="success"
                         component="a"
-                        href={selectedTutor.aadhaarUrl}
+                        href={selectedTutor.aadhaarUrl!}
                         target="_blank"
                         fullWidth
                       >
@@ -461,9 +473,9 @@ function TutorApplicationsTab() {
                       </Button>
                     </Paper>
                   </Grid>
-                ) : null}
+                )}
 
-                {selectedTutor.degreeUrl ? (
+                {isDocValid(selectedTutor.degreeUrl) && (
                   <Grid item xs={12} sm={6} md={3}>
                     <Paper variant="outlined" sx={{ p: 1.5, textAlign: "center" }}>
                       <Typography variant="caption" sx={{ fontWeight: 700, display: "block", mb: 1 }}>Degree / Marks</Typography>
@@ -472,7 +484,7 @@ function TutorApplicationsTab() {
                         variant="contained"
                         color="info"
                         component="a"
-                        href={selectedTutor.degreeUrl}
+                        href={selectedTutor.degreeUrl!}
                         target="_blank"
                         fullWidth
                       >
@@ -480,9 +492,9 @@ function TutorApplicationsTab() {
                       </Button>
                     </Paper>
                   </Grid>
-                ) : null}
+                )}
 
-                {selectedTutor.resumeUrl ? (
+                {isDocValid(selectedTutor.resumeUrl) && (
                   <Grid item xs={12} sm={6} md={3}>
                     <Paper variant="outlined" sx={{ p: 1.5, textAlign: "center" }}>
                       <Typography variant="caption" sx={{ fontWeight: 700, display: "block", mb: 1 }}>Resume / CV</Typography>
@@ -491,7 +503,7 @@ function TutorApplicationsTab() {
                         variant="contained"
                         color="warning"
                         component="a"
-                        href={selectedTutor.resumeUrl}
+                        href={selectedTutor.resumeUrl!}
                         target="_blank"
                         fullWidth
                       >
@@ -499,11 +511,11 @@ function TutorApplicationsTab() {
                       </Button>
                     </Paper>
                   </Grid>
-                ) : null}
+                )}
 
-                {!selectedTutor.photoUrl && !selectedTutor.aadhaarUrl && !selectedTutor.degreeUrl && !selectedTutor.resumeUrl && (
+                {!isDocValid(selectedTutor.photoUrl) && !isDocValid(selectedTutor.aadhaarUrl) && !isDocValid(selectedTutor.degreeUrl) && !isDocValid(selectedTutor.resumeUrl) && (
                   <Grid item xs={12}>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant="body2" sx={{ color: "text.secondary", fontStyle: "italic" }}>
                       No documents attached with this application.
                     </Typography>
                   </Grid>

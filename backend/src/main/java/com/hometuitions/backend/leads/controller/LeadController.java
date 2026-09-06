@@ -90,6 +90,21 @@ public class LeadController {
             String safeFilename = originalFilename.replaceAll("[^a-zA-Z0-9._-]", "_");
             String contentType = file.getContentType() != null ? file.getContentType() : "application/octet-stream";
 
+            // 1. Try Cloudflare R2 / S3 first if S3StorageService is available and configured
+            if (storageService instanceof S3StorageService s3StorageService) {
+                try {
+                    String prefix = documentType != null ? "tutor-applications/" + documentType : "tutor-applications";
+                    String key = s3StorageService.buildKey(prefix, "anon-" + UUID.randomUUID().toString().substring(0, 8), safeFilename);
+                    s3StorageService.uploadBytes(key, contentType, file.getBytes());
+                    String publicUrl = s3StorageService.generateDownloadUrl(key, DOWNLOAD_URL_TTL).toString();
+                    log.info("Uploaded lead document to Cloudflare R2/S3 key={} -> {}", key, publicUrl);
+                    return ResponseEntity.ok(new LeadUploadUrlResponse(null, key, publicUrl));
+                } catch (Exception e) {
+                    log.warn("Cloudflare R2/S3 upload failed, falling back to database document storage: {}", e.getMessage());
+                }
+            }
+
+            // 2. Fallback to Database Document Storage
             LeadDocument doc = LeadDocument.builder()
                     .filename(safeFilename)
                     .contentType(contentType)
@@ -104,7 +119,7 @@ public class LeadController {
             String publicUrl = baseUrl + "/api/v1/leads/documents/" + saved.getId() + "/" + safeFilename;
             String fileKey = "documents/" + saved.getId() + "/" + safeFilename;
 
-            log.info("Uploaded lead document id={} ({}, {} bytes) -> {}", saved.getId(), safeFilename, file.getSize(), publicUrl);
+            log.info("Saved lead document to database storage id={} ({}, {} bytes) -> {}", saved.getId(), safeFilename, file.getSize(), publicUrl);
 
             return ResponseEntity.ok(new LeadUploadUrlResponse(
                     null,

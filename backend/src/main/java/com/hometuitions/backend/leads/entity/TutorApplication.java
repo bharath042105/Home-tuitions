@@ -100,7 +100,20 @@ public class TutorApplication extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String bio;
 
+    @Column(name = "photo_url", columnDefinition = "TEXT")
+    private String photoUrl;
+
+    @Column(name = "aadhaar_url", columnDefinition = "TEXT")
+    private String aadhaarUrl;
+
+    @Column(name = "degree_url", columnDefinition = "TEXT")
+    private String degreeUrl;
+
+    @Column(name = "resume_url", columnDefinition = "TEXT")
+    private String resumeUrl;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private LeadStatus status = LeadStatus.NEW;
 }
+

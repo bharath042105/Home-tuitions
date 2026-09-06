@@ -12,13 +12,16 @@ import {
   BookOpen,
   User,
   Mail,
-  Sparkles
+  Sparkles,
+  Loader2,
+  Navigation
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Stepper } from "@/components/ui/Stepper";
 import { SiteHeader } from "@/components/features/marketing/SiteHeader";
 import { SiteFooter } from "@/components/features/marketing/SiteFooter";
 import { leadsApi } from "@/lib/api/leads";
+import { ApiError } from "@hometuitions/shared";
 
 const STEPS = ["Academic Details", "Tuition Preferences", "Contact Info"];
 
@@ -43,7 +46,79 @@ const CLASS_OPTIONS = [
   "Other / Competitive Exams"
 ];
 
-const BOARD_OPTIONS = ["CBSE", "ICSE / ISC", "SSC (State Board)", "IGCSE / IB", "Other"];
+const getBoardsForGrade = (selectedGrade: string): string[] => {
+  if (!selectedGrade) {
+    return ["CBSE", "ICSE / ISC", "SSC (State Board)", "IGCSE / IB", "Other"];
+  }
+
+  if (
+    selectedGrade.includes("Nursery") ||
+    selectedGrade.includes("Class 1") ||
+    selectedGrade.includes("Class 2") ||
+    selectedGrade.includes("Class 3") ||
+    selectedGrade.includes("Class 4") ||
+    selectedGrade.includes("Class 5")
+  ) {
+    return ["CBSE", "ICSE", "State Board (SSC)", "Montessori / IB PYP", "Other"];
+  }
+
+  if (
+    selectedGrade.includes("Class 6") ||
+    selectedGrade.includes("Class 7") ||
+    selectedGrade.includes("Class 8") ||
+    selectedGrade.includes("Class 9") ||
+    selectedGrade.includes("Class 10")
+  ) {
+    return ["CBSE", "ICSE", "State Board (SSC / Matric)", "IGCSE / Cambridge", "Other"];
+  }
+
+  if (
+    selectedGrade.includes("Class 11") ||
+    selectedGrade.includes("Class 12") ||
+    selectedGrade.includes("Intermediate")
+  ) {
+    return [
+      "CBSE (Science / Commerce / Arts)",
+      "ISC (Class 11-12)",
+      "State Board (Intermediate / HSC)",
+      "IGCSE / IB Diploma",
+      "Other"
+    ];
+  }
+
+  if (selectedGrade.includes("IIT-JEE") || selectedGrade.includes("NEET")) {
+    return [
+      "CBSE / National Curriculum",
+      "State Board + Integrated Coaching",
+      "Advanced Foundation",
+      "Other"
+    ];
+  }
+
+  if (
+    selectedGrade.includes("Degree") ||
+    selectedGrade.includes("B.Tech") ||
+    selectedGrade.includes("Graduation")
+  ) {
+    return [
+      "University Syllabus (JNTU / OU / Autonomous)",
+      "Engineering Core",
+      "Degree Curriculum",
+      "Other"
+    ];
+  }
+
+  if (selectedGrade.includes("Coding")) {
+    return [
+      "Practical Project-Based",
+      "School Syllabus (Python/Java)",
+      "Beginner to Advanced",
+      "Other"
+    ];
+  }
+
+  return ["CBSE", "ICSE / ISC", "SSC (State Board)", "IGCSE / IB", "Other"];
+};
 
 const SUBJECT_OPTIONS = [
   "ALL Subjects",
@@ -68,11 +143,7 @@ function RequestTutorForm() {
   // Form Step State
   const [activeStep, setActiveStep] = useState(0);
   const [isSubmitted, setIsSubmitted] = useState(false);
-
-  const submitMutation = useMutation({
-    mutationFn: leadsApi.submitTuitionInquiry,
-    onSuccess: () => setIsSubmitted(true),
-  });
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Form Data State
   const [grade, setGrade] = useState("");
@@ -89,8 +160,32 @@ function RequestTutorForm() {
   const [budget, setBudget] = useState("3000 - 5000 / Month");
   const [remarks, setRemarks] = useState("");
 
+  // Location Auto-detect states
+  const [isDetectingLocation, setIsDetectingLocation] = useState(false);
+  const [locationDetected, setLocationDetected] = useState(false);
+
   // Error States
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const submitMutation = useMutation({
+    mutationFn: leadsApi.submitTuitionInquiry,
+    onSuccess: () => {
+      setIsSubmitted(true);
+      setErrorMessage(null);
+    },
+    onError: (err: unknown) => {
+      if (err instanceof ApiError) {
+        setErrorMessage(err.message);
+        if (err.fieldErrors) {
+          setErrors(err.fieldErrors);
+        }
+      } else if (err instanceof Error) {
+        setErrorMessage(err.message);
+      } else {
+        setErrorMessage("Something went wrong submitting your request. Please check your details and try again.");
+      }
+    },
+  });
 
   // Prepopulate from URL query params
   useEffect(() => {
@@ -99,13 +194,17 @@ function RequestTutorForm() {
     const urlType = searchParams.get("type");
 
     if (urlClass) {
-      if (urlClass === "Nursery-UKG") setGrade("Nursery / LKG / UKG");
-      else if (urlClass === "Class 1-5") setGrade("Class 5");
-      else if (urlClass === "Class 6-8") setGrade("Class 8");
-      else if (urlClass === "Class 9-10") setGrade("Class 10 (Board)");
-      else if (urlClass === "Class 11-12") setGrade("Class 12 (Intermediate / 2nd Year)");
-      else if (urlClass === "IIT-JEE/NEET") setGrade("IIT-JEE Foundation & Advanced");
-      else setGrade(urlClass);
+      let mapped = urlClass;
+      if (urlClass === "Nursery-UKG") mapped = "Nursery / LKG / UKG";
+      else if (urlClass === "Class 1-5") mapped = "Class 5";
+      else if (urlClass === "Class 6-8") mapped = "Class 8";
+      else if (urlClass === "Class 9-10") mapped = "Class 10 (Board)";
+      else if (urlClass === "Class 11-12") mapped = "Class 12 (Intermediate / 2nd Year)";
+      else if (urlClass === "IIT-JEE/NEET") mapped = "IIT-JEE Foundation & Advanced";
+      
+      setGrade(mapped);
+      const boards = getBoardsForGrade(mapped);
+      setBoard(boards[0] ?? "CBSE");
     }
 
     if (urlSubject) {
@@ -116,6 +215,16 @@ function RequestTutorForm() {
       setTuitionMode(urlType);
     }
   }, [searchParams]);
+
+  // Handle grade change and update board dynamically
+  const handleGradeChange = (newGrade: string) => {
+    setGrade(newGrade);
+    const availableBoards = getBoardsForGrade(newGrade);
+    if (!availableBoards.includes(board)) {
+      setBoard(availableBoards[0] ?? "CBSE");
+    }
+    setErrors((prev) => ({ ...prev, grade: "" }));
+  };
 
   // Handle Subject Select
   const toggleSubject = (subject: string) => {
@@ -145,6 +254,63 @@ function RequestTutorForm() {
     return timingOption;
   };
 
+  // Location Auto-detection handler
+  const handleDetectLocation = () => {
+    if (typeof window === "undefined" || !navigator.geolocation) {
+      setErrors((prev) => ({ ...prev, address: "Geolocation is not supported by your browser" }));
+      return;
+    }
+
+    setIsDetectingLocation(true);
+    setErrors((prev) => ({ ...prev, address: "" }));
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const { latitude, longitude } = position.coords;
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`
+          );
+
+          if (res.ok) {
+            const data = await res.json();
+            const addr = data.address || {};
+            const locality = addr.suburb || addr.neighbourhood || addr.residential || addr.road || "";
+            const city = addr.city || addr.town || addr.state_district || addr.county || "Hyderabad";
+            const postcode = addr.postcode ? ` - ${addr.postcode}` : "";
+            const formatted = [locality, city].filter(Boolean).join(", ") + postcode;
+
+            if (formatted.trim()) {
+              setAddress(formatted);
+              setLocationDetected(true);
+            } else {
+              setAddress(data.display_name || `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
+              setLocationDetected(true);
+            }
+          } else {
+            setAddress(`Lat: ${latitude.toFixed(4)}, Lng: ${longitude.toFixed(4)} (Hyderabad)`);
+            setLocationDetected(true);
+          }
+        } catch (e) {
+          console.warn("Reverse geocode failed:", e);
+          setAddress(`Detected Location (Hyderabad)`);
+          setLocationDetected(true);
+        } finally {
+          setIsDetectingLocation(false);
+        }
+      },
+      (error) => {
+        setIsDetectingLocation(false);
+        let errorMsg = "Unable to retrieve your location automatically.";
+        if (error.code === error.PERMISSION_DENIED) {
+          errorMsg = "Location access was denied. Please type your locality/area manually.";
+        }
+        setErrors((prev) => ({ ...prev, address: errorMsg }));
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }
+    );
+  };
+
   // Validations
   const validateStep = () => {
     const stepErrors: Record<string, string> = {};
@@ -154,17 +320,18 @@ function RequestTutorForm() {
       if (selectedSubjects.length === 0) stepErrors.subjects = "Select at least one subject";
     } else if (activeStep === 1) {
       if (tuitionMode === "HOME" && !address.trim()) {
-        stepErrors.address = "Address is required for in-person home tuition";
+        stepErrors.address = "Address / Locality is required for in-person home tuition";
       }
       if (timingOption === "Custom Timing" && !customTiming.trim()) {
         stepErrors.timings = "Please enter your custom preferred timing";
       }
     } else if (activeStep === 2) {
       if (!parentName.trim()) stepErrors.parentName = "Full name is required";
-      if (!mobile.trim()) {
+      const cleanMobile = mobile.replace(/\s+/g, "");
+      if (!cleanMobile) {
         stepErrors.mobile = "Mobile number is required";
-      } else if (!/^\d{10}$/.test(mobile.replace(/\s+/g, ""))) {
-        stepErrors.mobile = "Please enter a valid 10-digit mobile number";
+      } else if (!/^[6-9]\d{9}$/.test(cleanMobile)) {
+        stepErrors.mobile = "Please enter a valid 10-digit Indian mobile number starting with 6, 7, 8, or 9";
       }
       if (email.trim() && !/\S+@\S+\.\S+/.test(email)) {
         stepErrors.email = "Please enter a valid email address";
@@ -187,6 +354,7 @@ function RequestTutorForm() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validateStep()) {
+      setErrorMessage(null);
       submitMutation.mutate({
         grade,
         board,
@@ -196,13 +364,15 @@ function RequestTutorForm() {
         timings: getEffectiveTimings(),
         frequency,
         parentName,
-        mobile,
+        mobile: mobile.replace(/\s+/g, ""),
         email: email.trim() || undefined,
         budget,
         remarks: remarks.trim() || undefined,
       });
     }
   };
+
+  const currentBoardOptions = getBoardsForGrade(grade);
 
   if (isSubmitted) {
     const effectiveTimings = getEffectiveTimings();
@@ -222,7 +392,6 @@ function RequestTutorForm() {
       `\nPlease assist with tutor allocation.`;
 
     const whatsappUrl = `https://wa.me/918074470640?text=${encodeURIComponent(whatsappText)}`;
-    const emailMailto = `mailto:vidyatutorspoint@gmail.com,info@vidyahometuitions.com?subject=${encodeURIComponent(`New Tutor Request: ${parentName} - ${grade}`)}&body=${encodeURIComponent(whatsappText.replace(/\*/g, ""))}`;
 
     return (
       <div className="min-h-[80vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-neutral-50 dark:bg-neutral-950/20">
@@ -257,7 +426,7 @@ function RequestTutorForm() {
 
           <div className="w-full bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-800/40 rounded-xl p-3.5 text-center">
             <p className="text-xs text-emerald-700 dark:text-emerald-300 font-semibold">
-              ✅ Your complete request details have been automatically sent to our academic coordinators.
+              ✅ Your complete request details have been automatically registered and sent to our coordinators.
             </p>
           </div>
 
@@ -271,7 +440,7 @@ function RequestTutorForm() {
               <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
                 <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.664-.698c.983.536 1.83.827 2.796.827 3.182 0 5.768-2.586 5.768-5.766 0-3.18-2.586-5.714-5.768-5.714zm3.385 8.163c-.143.403-.828.74-1.15.787-.323.047-.743.08-2.128-.491-1.63-.672-2.67-2.327-2.752-2.436-.081-.109-.661-.879-.661-1.674 0-.795.419-1.186.568-1.344.15-.157.327-.197.436-.197.109 0 .218.001.314.006.101.005.237-.038.37.284.137.329.467 1.139.508 1.222.041.083.068.181.014.289-.055.109-.082.176-.164.272-.082.096-.173.214-.247.288-.082.082-.168.172-.072.336.096.164.427.705.916 1.141.629.561 1.159.734 1.323.816.164.082.26-.07.356-.179.096-.109.41-.478.52-.642.109-.164.218-.137.368-.082.15.055.956.451 1.12.533.164.082.273.123.314.191.041.069.041.396-.102.8z" />
               </svg>
-              Chat on WhatsApp for Instant Support (Optional)
+              Chat on WhatsApp for Instant Allocation (Optional)
             </a>
           </div>
 
@@ -310,7 +479,7 @@ function RequestTutorForm() {
             Request a Professional Tutor
           </h1>
           <p className="text-sm text-neutral-550 dark:text-neutral-400 mt-2">
-            Tell us your requirements and we will match you with verified educators in Hyderabad. First class is free!
+            Tell us your requirements and we will match you with verified educators in Hyderabad. First demo class is free!
           </p>
         </div>
 
@@ -329,15 +498,12 @@ function RequestTutorForm() {
                   </label>
                   <select
                     value={grade}
-                    onChange={(e) => {
-                      setGrade(e.target.value);
-                      setErrors((prev) => ({ ...prev, grade: "" }));
-                    }}
+                    onChange={(e) => handleGradeChange(e.target.value)}
                     className={`w-full h-11 px-3 rounded-lg border bg-white text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white ${
                       errors.grade ? "border-danger-500 ring-2 ring-danger-500/10" : "border-neutral-200"
                     }`}
                   >
-                    <option value="">-- Select Grade --</option>
+                    <option value="">-- Select Grade / Level --</option>
                     {CLASS_OPTIONS.map((opt) => (
                       <option key={opt} value={opt}>
                         {opt}
@@ -352,7 +518,7 @@ function RequestTutorForm() {
                     2. Select Board / Syllabus <span className="text-danger-500">*</span>
                   </label>
                   <div className="grid grid-cols-2 gap-2">
-                    {BOARD_OPTIONS.slice(0, 4).map((opt) => (
+                    {currentBoardOptions.map((opt) => (
                       <button
                         key={opt}
                         type="button"
@@ -362,7 +528,7 @@ function RequestTutorForm() {
                         }}
                         className={`h-11 px-3 text-xs font-semibold rounded-lg border text-left transition-all ${
                           board === opt
-                            ? "border-brand-500 bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-brand-300"
+                            ? "border-brand-500 bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-brand-300 shadow-sm"
                             : "border-neutral-200 hover:bg-neutral-50 dark:border-neutral-700 dark:hover:bg-neutral-850"
                         }`}
                       >
@@ -370,6 +536,7 @@ function RequestTutorForm() {
                       </button>
                     ))}
                   </div>
+                  {errors.board && <p className="text-xs text-danger-500 mt-1">{errors.board}</p>}
                 </div>
               </div>
 
@@ -449,23 +616,53 @@ function RequestTutorForm() {
               </div>
 
               {tuitionMode === "HOME" && (
-                <div className="animate-fade-in-up">
-                  <label className="block text-xs font-bold text-neutral-700 dark:text-neutral-350 uppercase tracking-wider mb-2">
-                    2. Home Address & Locality in Hyderabad <span className="text-danger-500">*</span>
-                  </label>
+                <div className="animate-fade-in-up flex flex-col gap-2">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs font-bold text-neutral-700 dark:text-neutral-350 uppercase tracking-wider">
+                      2. Home Address & Locality in Hyderabad <span className="text-danger-500">*</span>
+                    </label>
+
+                    {/* Auto-detect Location Button */}
+                    <button
+                      type="button"
+                      onClick={handleDetectLocation}
+                      disabled={isDetectingLocation}
+                      className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-600 dark:text-brand-400 hover:text-brand-700 transition-colors bg-brand-50 dark:bg-brand-500/10 px-3 py-1.5 rounded-lg border border-brand-200 dark:border-brand-800/40"
+                    >
+                      {isDetectingLocation ? (
+                        <>
+                          <Loader2 size={13} className="animate-spin" />
+                          Detecting Location...
+                        </>
+                      ) : (
+                        <>
+                          <Navigation size={13} />
+                          Auto-Detect Location
+                        </>
+                      )}
+                    </button>
+                  </div>
+
+                  {locationDetected && (
+                    <p className="text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                      <CheckCircle2 size={13} />
+                      Location auto-detected. You can refine your flat/house number below.
+                    </p>
+                  )}
+
                   <textarea
                     value={address}
                     onChange={(e) => {
                       setAddress(e.target.value);
                       setErrors((prev) => ({ ...prev, address: "" }));
                     }}
-                    placeholder="e.g. Flat 302, Sai Enclave, Chanda Nagar, Near Jyothi Theatre"
+                    placeholder="e.g. Flat 302, Sai Enclave, Chanda Nagar, Near Jyothi Theatre, Hyderabad"
                     rows={3}
                     className={`w-full p-3 rounded-lg border bg-white text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white ${
                       errors.address ? "border-danger-500 ring-2 ring-danger-500/10" : "border-neutral-200"
                     }`}
                   />
-                  {errors.address && <p className="text-xs text-danger-500 mt-1">{errors.address}</p>}
+                  {errors.address && <p className="text-xs text-danger-500 mt-0.5">{errors.address}</p>}
                 </div>
               )}
 
@@ -562,12 +759,14 @@ function RequestTutorForm() {
                     <span className="absolute left-3.5 top-3 text-sm text-neutral-450 font-semibold">+91</span>
                     <input
                       type="tel"
+                      maxLength={10}
                       value={mobile}
                       onChange={(e) => {
-                        setMobile(e.target.value);
+                        const val = e.target.value.replace(/\D/g, "");
+                        setMobile(val);
                         setErrors((prev) => ({ ...prev, mobile: "" }));
                       }}
-                      placeholder="98765 43210"
+                      placeholder="9876543210"
                       className={`w-full h-11 pl-12 pr-3 rounded-lg border bg-white text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white ${
                         errors.mobile ? "border-danger-500 ring-2 ring-danger-500/10" : "border-neutral-200"
                       }`}
@@ -611,7 +810,7 @@ function RequestTutorForm() {
                   >
                     <option value="Under 3000 / Month">Under ₹3,000 / Month</option>
                     <option value="3000 - 5000 / Month">₹3,000 - ₹5,000 / Month</option>
-                    <option value="5000 - 8000 / Month">₹5,050 - ₹8,000 / Month</option>
+                    <option value="5000 - 8000 / Month">₹5,000 - ₹8,000 / Month</option>
                     <option value="8000 - 12000 / Month">₹8,000 - ₹12,000 / Month</option>
                     <option value="Above 12000 / Month">Above ₹12,000 / Month</option>
                     <option value="Per Hour Basis">On Hourly Basis (e.g. ₹300-500/hr)</option>
@@ -671,10 +870,10 @@ function RequestTutorForm() {
             )}
           </div>
 
-          {submitMutation.isError && (
-            <p role="alert" className="text-sm text-danger-500">
-              Something went wrong submitting your request - please try again.
-            </p>
+          {errorMessage && (
+            <div role="alert" className="p-3.5 rounded-xl bg-danger-50 dark:bg-danger-500/10 border border-danger-200 dark:border-danger-800 text-danger-700 dark:text-danger-300 text-xs font-medium">
+              ⚠️ {errorMessage}
+            </div>
           )}
         </form>
       </div>
@@ -687,15 +886,15 @@ export default function RequestTutorPage() {
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950/20 transition-colors flex flex-col">
       <SiteHeader />
       <div className="flex-1 py-12 px-4 sm:px-6 lg:px-8">
-      <Suspense
-        fallback={
-          <div className="min-h-[50vh] flex items-center justify-center">
-            <p className="text-sm text-neutral-450">Loading request form...</p>
-          </div>
-        }
-      >
-        <RequestTutorForm />
-      </Suspense>
+        <Suspense
+          fallback={
+            <div className="min-h-[50vh] flex items-center justify-center">
+              <p className="text-sm text-neutral-450">Loading request form...</p>
+            </div>
+          }
+        >
+          <RequestTutorForm />
+        </Suspense>
       </div>
       <SiteFooter />
     </div>

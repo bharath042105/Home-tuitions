@@ -4,6 +4,7 @@ import com.hometuitions.backend.leads.entity.LeadStatus;
 import com.hometuitions.backend.leads.entity.TutorApplication;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -35,6 +36,10 @@ public record TutorApplicationResponse(
         String expectedRate,
         String timings,
         String bio,
+        String photoUrl,
+        String aadhaarUrl,
+        String degreeUrl,
+        String resumeUrl,
         LeadStatus status,
         Instant createdAt
 ) {
@@ -53,9 +58,9 @@ public record TutorApplicationResponse(
                 application.getSchoolPercentage(),
                 application.getLocalities(),
                 application.getCommuteDistance(),
-                List.of(application.getGrades().split(",")),
-                List.of(application.getSubjects().split(",")),
-                List.of(application.getBoards().split(",")),
+                splitCsv(application.getGrades()),
+                splitCsv(application.getSubjects()),
+                splitCsv(application.getBoards()),
                 application.getMedium(),
                 application.getMode(),
                 application.getMobile(),
@@ -67,7 +72,21 @@ public record TutorApplicationResponse(
                 application.getExpectedRate(),
                 application.getTimings(),
                 application.getBio(),
+                application.getPhotoUrl(),
+                application.getAadhaarUrl(),
+                application.getDegreeUrl(),
+                application.getResumeUrl(),
                 application.getStatus(),
                 application.getCreatedAt());
+    }
+
+    private static List<String> splitCsv(String csv) {
+        if (csv == null || csv.isBlank()) {
+            return List.of();
+        }
+        return Arrays.stream(csv.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .toList();
     }
 }

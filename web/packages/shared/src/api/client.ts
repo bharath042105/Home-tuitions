@@ -8,7 +8,12 @@ export interface ApiClientConfig {
 }
 
 export class ApiError extends Error {
-  constructor(public status: number, public code: string, message: string) {
+  constructor(
+    public status: number,
+    public code: string,
+    message: string,
+    public fieldErrors?: Record<string, string>
+  ) {
     super(message);
   }
 }
@@ -44,7 +49,14 @@ export function createApiClient(config: ApiClientConfig) {
 
     if (!response.ok) {
       const body = await response.json().catch(() => ({}));
-      throw new ApiError(response.status, body.code ?? "UNKNOWN_ERROR", body.message ?? response.statusText);
+      let msg = body.message;
+      if (!msg && body.fieldErrors && typeof body.fieldErrors === "object") {
+        msg = Object.values(body.fieldErrors).join(". ");
+      }
+      if (!msg) {
+        msg = response.statusText || "Request failed";
+      }
+      throw new ApiError(response.status, body.code ?? "UNKNOWN_ERROR", msg, body.fieldErrors);
     }
 
     // Read as text first rather than special-casing only 204: a 201 Created (e.g.

@@ -46,6 +46,10 @@ export interface TutorApplicationDto {
   expectedRate: string;
   timings: string | null;
   bio: string | null;
+  photoUrl: string | null;
+  aadhaarUrl: string | null;
+  degreeUrl: string | null;
+  resumeUrl: string | null;
   status: LeadStatus;
   createdAt: string;
 }
@@ -58,6 +62,12 @@ export interface ContactMessageDto {
   message: string;
   status: LeadStatus;
   createdAt: string;
+}
+
+export interface LeadUploadUrlResponse {
+  uploadUrl: string | null;
+  key: string;
+  publicUrl: string | null;
 }
 
 export interface PageResponse<T> {

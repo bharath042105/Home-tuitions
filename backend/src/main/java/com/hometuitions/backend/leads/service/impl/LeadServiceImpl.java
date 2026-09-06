@@ -106,6 +106,10 @@ public class LeadServiceImpl implements LeadService {
         application.setExpectedRate(request.expectedRate());
         application.setTimings(request.timings());
         application.setBio(request.bio());
+        application.setPhotoUrl(request.photoUrl());
+        application.setAadhaarUrl(request.aadhaarUrl());
+        application.setDegreeUrl(request.degreeUrl());
+        application.setResumeUrl(request.resumeUrl());
         TutorApplication saved = tutorApplicationRepository.save(application);
         if (notificationService != null) {
             try {

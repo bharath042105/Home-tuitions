@@ -320,7 +320,6 @@
       "post": {
         "tags": ["Leads"],
         "summary": "Submit a tuition inquiry / lead",
-        "security": [{ "bearerAuth": [] }],
         "requestBody": {
           "required": true,
           "content": {
@@ -330,17 +329,81 @@
         "responses": {
           "201": { "description": "Lead created successfully" }
         }
-      },
-      "get": {
+      }
+    },
+    "/api/v1/leads/upload-url": {
+      "post": {
         "tags": ["Leads"],
-        "summary": "Get user's tuition leads",
+        "summary": "Request S3/R2 presigned upload URL for tutor registration documents",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["filename", "contentType"],
+                "properties": {
+                  "filename": { "type": "string", "example": "degree_certificate.pdf" },
+                  "contentType": { "type": "string", "example": "application/pdf" },
+                  "documentType": { "type": "string", "enum": ["photo", "aadhaar", "degree", "resume"], "example": "degree" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Presigned upload URL and persistent public download URL",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "uploadUrl": { "type": "string" },
+                    "key": { "type": "string" },
+                    "publicUrl": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/leads/tutor-applications": {
+      "post": {
+        "tags": ["Leads"],
+        "summary": "Submit tutor onboarding application with credentials and document URLs",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/SubmitTutorApplicationRequest" } }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Application submitted successfully",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/TutorApplicationResponse" } } }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/leads/tutor-applications": {
+      "get": {
+        "tags": ["Admin - Leads"],
+        "summary": "List paginated tutor applications with document verification links",
         "security": [{ "bearerAuth": [] }],
         "responses": {
           "200": {
-            "description": "List of user leads",
+            "description": "List of tutor applications",
             "content": {
               "application/json": {
-                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/LeadResponse" } }
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "content": { "type": "array", "items": { "$ref": "#/components/schemas/TutorApplicationResponse" } }
+                  }
+                }
               }
             }
           }
@@ -348,6 +411,7 @@
       }
     },
     "/api/v1/bookings": {
+
       "post": {
         "tags": ["Bookings"],
         "summary": "Create a new tuition booking",

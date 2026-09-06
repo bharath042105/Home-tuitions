@@ -251,7 +251,7 @@ function TutorApplicationsTab() {
   const rows = data?.content ?? [];
 
   const getTutorWhatsappText = (tutor: TutorApplicationDto) => {
-    return `*Tutor Application Details - Vidya Home Tuitions*\n\n` +
+    let text = `*Tutor Application Details - Vidya Home Tuitions*\n\n` +
       `*Name:* ${tutor.name}\n` +
       `*Mobile:* +91 ${tutor.mobile}\n` +
       `*WhatsApp:* +91 ${tutor.whatsapp}\n` +
@@ -266,8 +266,18 @@ function TutorApplicationsTab() {
       `*Experience:* ${tutor.experience}\n` +
       `*Expected Pay:* ${tutor.expectedRate}\n` +
       `*Timings:* ${tutor.timings}\n` +
-      (tutor.bio ? `*Bio:* ${tutor.bio}\n` : "") +
-      `*Status:* ${tutor.status}`;
+      (tutor.bio ? `*Bio:* ${tutor.bio}\n` : "");
+
+    if (tutor.photoUrl || tutor.aadhaarUrl || tutor.degreeUrl || tutor.resumeUrl) {
+      text += `\n*Attached Documents:*\n`;
+      if (tutor.photoUrl) text += `• Photo: ${tutor.photoUrl}\n`;
+      if (tutor.aadhaarUrl) text += `• Aadhaar: ${tutor.aadhaarUrl}\n`;
+      if (tutor.degreeUrl) text += `• Degree: ${tutor.degreeUrl}\n`;
+      if (tutor.resumeUrl) text += `• Resume: ${tutor.resumeUrl}\n`;
+    }
+
+    text += `\n*Status:* ${tutor.status}`;
+    return text;
   };
 
   return (
@@ -281,6 +291,7 @@ function TutorApplicationsTab() {
               <TableCell sx={{ fontWeight: 600 }}>Subjects</TableCell>
               <TableCell sx={{ fontWeight: 600 }}>Mode</TableCell>
               <TableCell sx={{ fontWeight: 600 }}>Contact</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>Documents</TableCell>
               <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
               <TableCell sx={{ fontWeight: 600 }} align="right">Actions</TableCell>
             </TableRow>
@@ -298,6 +309,61 @@ function TutorApplicationsTab() {
                   </a>
                 </TableCell>
                 <TableCell>
+                  <Stack direction="row" spacing={0.5}>
+                    {row.photoUrl && (
+                      <Chip
+                        size="small"
+                        label="Photo"
+                        color="primary"
+                        variant="outlined"
+                        component="a"
+                        href={row.photoUrl}
+                        target="_blank"
+                        clickable
+                      />
+                    )}
+                    {row.aadhaarUrl && (
+                      <Chip
+                        size="small"
+                        label="Aadhaar"
+                        color="success"
+                        variant="outlined"
+                        component="a"
+                        href={row.aadhaarUrl}
+                        target="_blank"
+                        clickable
+                      />
+                    )}
+                    {row.degreeUrl && (
+                      <Chip
+                        size="small"
+                        label="Degree"
+                        color="info"
+                        variant="outlined"
+                        component="a"
+                        href={row.degreeUrl}
+                        target="_blank"
+                        clickable
+                      />
+                    )}
+                    {row.resumeUrl && (
+                      <Chip
+                        size="small"
+                        label="Resume"
+                        color="warning"
+                        variant="outlined"
+                        component="a"
+                        href={row.resumeUrl}
+                        target="_blank"
+                        clickable
+                      />
+                    )}
+                    {!row.photoUrl && !row.aadhaarUrl && !row.degreeUrl && !row.resumeUrl && (
+                      <Typography variant="caption" color="text.secondary">None</Typography>
+                    )}
+                  </Stack>
+                </TableCell>
+                <TableCell>
                   <Chip size="small" color={STATUS_COLOR[row.status]} label={row.status} />
                 </TableCell>
                 <TableCell align="right">
@@ -312,7 +378,7 @@ function TutorApplicationsTab() {
             ))}
             {!isLoading && rows.length === 0 && (
               <TableRow>
-                <TableCell colSpan={7} align="center" sx={{ color: "text.secondary", py: 4 }}>
+                <TableCell colSpan={8} align="center" sx={{ color: "text.secondary", py: 4 }}>
                   No tutor applications yet
                 </TableCell>
               </TableRow>
@@ -351,6 +417,97 @@ function TutorApplicationsTab() {
                 <DetailItem label="Available Timings" value={selectedTutor.timings} />
                 {selectedTutor.bio && <DetailItem label="Short Bio" value={selectedTutor.bio} />}
                 <DetailItem label="Applied On" value={new Date(selectedTutor.createdAt).toLocaleString()} />
+              </Grid>
+
+              {/* Attached Verification Documents */}
+              <Divider sx={{ my: 2.5 }} />
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1.5 }}>
+                📎 Attached Verification Documents:
+              </Typography>
+              <Grid container spacing={2}>
+                {selectedTutor.photoUrl ? (
+                  <Grid item xs={12} sm={6} md={3}>
+                    <Paper variant="outlined" sx={{ p: 1.5, textAlign: "center" }}>
+                      <Typography variant="caption" sx={{ fontWeight: 700, display: "block", mb: 1 }}>Profile Photo</Typography>
+                      <Button
+                        size="small"
+                        variant="contained"
+                        color="primary"
+                        component="a"
+                        href={selectedTutor.photoUrl}
+                        target="_blank"
+                        fullWidth
+                      >
+                        View Photo
+                      </Button>
+                    </Paper>
+                  </Grid>
+                ) : null}
+
+                {selectedTutor.aadhaarUrl ? (
+                  <Grid item xs={12} sm={6} md={3}>
+                    <Paper variant="outlined" sx={{ p: 1.5, textAlign: "center" }}>
+                      <Typography variant="caption" sx={{ fontWeight: 700, display: "block", mb: 1 }}>Aadhaar Card</Typography>
+                      <Button
+                        size="small"
+                        variant="contained"
+                        color="success"
+                        component="a"
+                        href={selectedTutor.aadhaarUrl}
+                        target="_blank"
+                        fullWidth
+                      >
+                        View Aadhaar
+                      </Button>
+                    </Paper>
+                  </Grid>
+                ) : null}
+
+                {selectedTutor.degreeUrl ? (
+                  <Grid item xs={12} sm={6} md={3}>
+                    <Paper variant="outlined" sx={{ p: 1.5, textAlign: "center" }}>
+                      <Typography variant="caption" sx={{ fontWeight: 700, display: "block", mb: 1 }}>Degree / Marks</Typography>
+                      <Button
+                        size="small"
+                        variant="contained"
+                        color="info"
+                        component="a"
+                        href={selectedTutor.degreeUrl}
+                        target="_blank"
+                        fullWidth
+                      >
+                        View Degree
+                      </Button>
+                    </Paper>
+                  </Grid>
+                ) : null}
+
+                {selectedTutor.resumeUrl ? (
+                  <Grid item xs={12} sm={6} md={3}>
+                    <Paper variant="outlined" sx={{ p: 1.5, textAlign: "center" }}>
+                      <Typography variant="caption" sx={{ fontWeight: 700, display: "block", mb: 1 }}>Resume / CV</Typography>
+                      <Button
+                        size="small"
+                        variant="contained"
+                        color="warning"
+                        component="a"
+                        href={selectedTutor.resumeUrl}
+                        target="_blank"
+                        fullWidth
+                      >
+                        View Resume
+                      </Button>
+                    </Paper>
+                  </Grid>
+                ) : null}
+
+                {!selectedTutor.photoUrl && !selectedTutor.aadhaarUrl && !selectedTutor.degreeUrl && !selectedTutor.resumeUrl && (
+                  <Grid item xs={12}>
+                    <Typography variant="body2" color="text.secondary">
+                      No documents attached with this application.
+                    </Typography>
+                  </Grid>
+                )}
               </Grid>
 
               <Divider sx={{ my: 2.5 }} />
@@ -393,6 +550,7 @@ function TutorApplicationsTab() {
     </>
   );
 }
+
 
 function ContactMessagesTab() {
   const queryClient = useQueryClient();

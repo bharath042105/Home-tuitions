@@ -138,6 +138,11 @@ public class LeadNotificationServiceImpl implements LeadNotificationService {
             String timings = val(app.getTimings());
             String bio = val(app.getBio());
 
+            String photoUrl = val(app.getPhotoUrl());
+            String aadhaarUrl = val(app.getAadhaarUrl());
+            String degreeUrl = val(app.getDegreeUrl());
+            String resumeUrl = val(app.getResumeUrl());
+
             String subject = "👨‍🏫 New Tutor Application: " + name + " (" + qualification + " - " + subjects + ")";
 
             StringBuilder plainText = new StringBuilder();
@@ -153,7 +158,22 @@ public class LeadNotificationServiceImpl implements LeadNotificationService {
             plainText.append("• Localities: ").append(localities).append(" (").append(distance).append(")\n");
             plainText.append("• Expected Rate: ").append(rate).append(" | Timings: ").append(timings).append("\n");
             plainText.append("• Bio: ").append(bio).append("\n\n");
-            plainText.append("Admin Portal: https://vidya-admin-iota.vercel.app/leads\n");
+            plainText.append("=== ATTACHED DOCUMENTS ===\n");
+            if (!"-".equals(photoUrl)) plainText.append("• Photo: ").append(photoUrl).append("\n");
+            if (!"-".equals(aadhaarUrl)) plainText.append("• Aadhaar Card: ").append(aadhaarUrl).append("\n");
+            if (!"-".equals(degreeUrl)) plainText.append("• Degree Certificate: ").append(degreeUrl).append("\n");
+            if (!"-".equals(resumeUrl)) plainText.append("• Resume / CV: ").append(resumeUrl).append("\n");
+            plainText.append("\nAdmin Portal: https://vidya-admin-iota.vercel.app/leads\n");
+
+            StringBuilder docsHtml = new StringBuilder();
+            if (!"-".equals(photoUrl) || !"-".equals(aadhaarUrl) || !"-".equals(degreeUrl) || !"-".equals(resumeUrl)) {
+                docsHtml.append("<tr style=\"border-bottom: 1px solid #f0f0f0;\"><td style=\"padding: 8px 0; color: #666; font-weight: bold;\">Submitted Documents:</td><td style=\"padding: 8px 0;\">");
+                if (!"-".equals(photoUrl)) docsHtml.append("<a href=\"").append(escape(photoUrl)).append("\" target=\"_blank\" style=\"color: #059669; font-weight: bold; margin-right: 12px; text-decoration: underline;\">📷 Profile Photo</a> ");
+                if (!"-".equals(aadhaarUrl)) docsHtml.append("<a href=\"").append(escape(aadhaarUrl)).append("\" target=\"_blank\" style=\"color: #059669; font-weight: bold; margin-right: 12px; text-decoration: underline;\">🪪 Aadhaar Card</a> ");
+                if (!"-".equals(degreeUrl)) docsHtml.append("<a href=\"").append(escape(degreeUrl)).append("\" target=\"_blank\" style=\"color: #059669; font-weight: bold; margin-right: 12px; text-decoration: underline;\">🎓 Degree Cert</a> ");
+                if (!"-".equals(resumeUrl)) docsHtml.append("<a href=\"").append(escape(resumeUrl)).append("\" target=\"_blank\" style=\"color: #059669; font-weight: bold; text-decoration: underline;\">📄 Resume</a>");
+                docsHtml.append("</td></tr>");
+            }
 
             String html = "<div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 12px; overflow: hidden; background: #ffffff;\">"
                     + "<div style=\"background: linear-gradient(135deg, #059669, #10b981); padding: 20px; color: white; text-align: center;\">"
@@ -172,7 +192,8 @@ public class LeadNotificationServiceImpl implements LeadNotificationService {
                     + "<tr style=\"border-bottom: 1px solid #f0f0f0;\"><td style=\"padding: 8px 0; color: #666;\">Boards:</td><td style=\"padding: 8px 0;\">" + escape(boards) + "</td></tr>"
                     + "<tr style=\"border-bottom: 1px solid #f0f0f0;\"><td style=\"padding: 8px 0; color: #666;\">Localities:</td><td style=\"padding: 8px 0;\">" + escape(localities) + " (" + escape(distance) + ")</td></tr>"
                     + "<tr style=\"border-bottom: 1px solid #f0f0f0;\"><td style=\"padding: 8px 0; color: #666;\">Pay & Timings:</td><td style=\"padding: 8px 0;\">" + escape(rate) + " | " + escape(timings) + "</td></tr>"
-                    + "<tr><td style=\"padding: 8px 0; color: #666;\">Bio:</td><td style=\"padding: 8px 0;\">" + escape(bio) + "</td></tr>"
+                    + "<tr style=\"border-bottom: 1px solid #f0f0f0;\"><td style=\"padding: 8px 0; color: #666;\">Bio:</td><td style=\"padding: 8px 0;\">" + escape(bio) + "</td></tr>"
+                    + docsHtml.toString()
                     + "</table>"
                     + "<div style=\"margin-top: 24px; text-align: center;\">"
                     + "<a href=\"https://vidya-admin-iota.vercel.app/leads\" style=\"background: #059669; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;\">Review in Admin Portal</a>"
@@ -181,6 +202,7 @@ public class LeadNotificationServiceImpl implements LeadNotificationService {
                     + "</div>";
 
             sendEmail(subject, plainText.toString(), html);
+
         } catch (Exception e) {
             log.error("Failed to process tutor application notification: {}", e.getMessage(), e);
         }

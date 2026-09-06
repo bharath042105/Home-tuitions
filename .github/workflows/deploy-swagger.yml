@@ -8,48 +8,21 @@ on:
 
 permissions:
   contents: write
-  pages: write
-  id-token: write
 
 concurrency:
   group: "pages"
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
-  # Job 1: Always push files to the gh-pages branch (works with "Deploy from a branch")
-  deploy-to-branch:
+  deploy-swagger:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Deploy to gh-pages branch
+      - name: Deploy Swagger UI to gh-pages branch
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./swagger-docs
           force_orphan: true
-
-  # Job 2: Deploy directly via GitHub Actions Pages (works with "GitHub Actions" source)
-  deploy-pages:
-    needs: deploy-to-branch
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Setup GitHub Pages
-        uses: actions/configure-pages@v5
-        with:
-          enablement: true
-        continue-on-error: true
-
-      - name: Upload Swagger Docs Artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: './swagger-docs'
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
-        continue-on-error: true

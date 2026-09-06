@@ -84,8 +84,12 @@ public class LeadController {
             HttpServletRequest request) {
         try {
             if (file.isEmpty()) {
+                log.warn("Upload rejected: empty file received");
                 return ResponseEntity.badRequest().build();
             }
+
+            log.info("📤 Document upload request received: filename={}, size={} bytes, contentType={}, documentType={}",
+                    file.getOriginalFilename(), file.getSize(), file.getContentType(), documentType);
 
             String originalFilename = file.getOriginalFilename() != null ? file.getOriginalFilename() : "document";
             String safeFilename = originalFilename.replaceAll("[^a-zA-Z0-9._-]", "_");

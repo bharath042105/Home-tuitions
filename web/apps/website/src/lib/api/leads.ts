@@ -27,61 +27,46 @@ export const leadsApi = {
     }),
 
   /**
-   * Uploads a file by first posting to backend /api/v1/leads/upload-file,
-   * with fallback to S3 presigned PUT and local base64.
+   * Uploads a file to backend /api/v1/leads/upload-file (multipart).
+   * Returns the permanent public URL on success, or throws on failure.
    */
   uploadDocumentFile: async (file: File, documentType?: string): Promise<string> => {
+    // Use the same base URL that the apiClient uses (known to work for form submission)
     const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080";
 
-    // 1. Direct multipart upload to backend (stores in DB/S3 and returns permanent public URL)
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-      if (documentType) {
-        formData.append("documentType", documentType);
-      }
+    // Validate file size client-side (max 10MB to match backend Spring config)
+    if (file.size > 10 * 1024 * 1024) {
+      throw new Error(`File "${file.name}" is too large (${(file.size / 1024 / 1024).toFixed(1)} MB). Maximum allowed size is 10 MB.`);
+    }
 
-      const response = await fetch(`${baseUrl}/api/v1/leads/upload-file`, {
+    const formData = new FormData();
+    formData.append("file", file);
+    if (documentType) {
+      formData.append("documentType", documentType);
+    }
+
+    let response: Response;
+    try {
+      response = await fetch(`${baseUrl}/api/v1/leads/upload-file`, {
         method: "POST",
         body: formData,
       });
-
-      if (response.ok) {
-        const data = (await response.json()) as LeadUploadUrlResponse;
-        if (data.publicUrl) {
-          return data.publicUrl;
-        }
-      }
-    } catch (err) {
-      console.warn("Direct upload-file failed, trying presigned upload fallback:", err);
+    } catch (networkErr) {
+      console.error("Document upload network error:", networkErr);
+      throw new Error(`Network error uploading "${file.name}". Please check your internet connection and try again.`);
     }
 
-    // 2. Presigned URL fallback
-    try {
-      const res = await leadsApi.getUploadUrl(file.name, file.type || "application/octet-stream", documentType);
-      if (res && res.uploadUrl && res.publicUrl) {
-        const uploadRes = await fetch(res.uploadUrl, {
-          method: "PUT",
-          headers: {
-            "Content-Type": file.type || "application/octet-stream",
-          },
-          body: file,
-        });
-
-        if (uploadRes.ok) {
-          return res.publicUrl;
-        }
-      }
-    } catch (e) {
-      console.warn("Presigned S3/R2 upload failed, falling back to data URL encoding:", e);
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => "Unknown error");
+      console.error(`Document upload HTTP error ${response.status}:`, errorText);
+      throw new Error(`Upload failed for "${file.name}" (HTTP ${response.status}). Please try again.`);
     }
 
-    // 3. Client-side fallback to base64 Data URL
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = (error) => reject(error);
-      reader.readAsDataURL(file);
-    });
+    const data = (await response.json()) as LeadUploadUrlResponse;
+    if (!data.publicUrl) {
+      throw new Error(`Upload succeeded but no download URL was returned for "${file.name}". Please try again.`);
+    }
+
+    return data.publicUrl;
   },
 };

@@ -185,36 +185,33 @@ export default function TutorRegistrationPage() {
     file: File,
     docType: "photo" | "aadhaar" | "degree" | "resume"
   ) => {
+    // Set uploading state immediately
+    if (docType === "photo") { setIsUploadingPhoto(true); setPhotoName(null); setPhotoUrl(null); }
+    if (docType === "aadhaar") { setIsUploadingAadhaar(true); setAadhaarName(null); setAadhaarUrl(null); }
+    if (docType === "degree") { setIsUploadingDegree(true); setDegreeName(null); setDegreeUrl(null); }
+    if (docType === "resume") { setIsUploadingResume(true); setResumeName(null); setResumeUrl(null); }
+    setErrors((prev) => ({ ...prev, [docType]: "" }));
+
     try {
-      if (docType === "photo") {
-        setIsUploadingPhoto(true);
-        setPhotoName(file.name);
-        const url = await leadsApi.uploadDocumentFile(file, "photo");
-        setPhotoUrl(url);
-        setErrors((prev) => ({ ...prev, photo: "" }));
-      } else if (docType === "aadhaar") {
-        setIsUploadingAadhaar(true);
-        setAadhaarName(file.name);
-        const url = await leadsApi.uploadDocumentFile(file, "aadhaar");
-        setAadhaarUrl(url);
-        setErrors((prev) => ({ ...prev, aadhaar: "" }));
-      } else if (docType === "degree") {
-        setIsUploadingDegree(true);
-        setDegreeName(file.name);
-        const url = await leadsApi.uploadDocumentFile(file, "degree");
-        setDegreeUrl(url);
-      } else if (docType === "resume") {
-        setIsUploadingResume(true);
-        setResumeName(file.name);
-        const url = await leadsApi.uploadDocumentFile(file, "resume");
-        setResumeUrl(url);
-      }
+      const url = await leadsApi.uploadDocumentFile(file, docType);
+
+      // Only show the green checkmark AFTER upload succeeds
+      if (docType === "photo") { setPhotoUrl(url); setPhotoName(file.name); }
+      else if (docType === "aadhaar") { setAadhaarUrl(url); setAadhaarName(file.name); }
+      else if (docType === "degree") { setDegreeUrl(url); setDegreeName(file.name); }
+      else if (docType === "resume") { setResumeUrl(url); setResumeName(file.name); }
     } catch (e) {
       console.error("Document upload error:", e);
+      const errorMsg = e instanceof Error ? e.message : "Failed to upload file. Please try again.";
       setErrors((prev) => ({
         ...prev,
-        [docType]: "Failed to upload file. Please try again.",
+        [docType]: errorMsg,
       }));
+      // Clear any stale state on failure
+      if (docType === "photo") { setPhotoName(null); setPhotoUrl(null); }
+      if (docType === "aadhaar") { setAadhaarName(null); setAadhaarUrl(null); }
+      if (docType === "degree") { setDegreeName(null); setDegreeUrl(null); }
+      if (docType === "resume") { setResumeName(null); setResumeUrl(null); }
     } finally {
       if (docType === "photo") setIsUploadingPhoto(false);
       if (docType === "aadhaar") setIsUploadingAadhaar(false);
@@ -261,8 +258,17 @@ export default function TutorRegistrationPage() {
         stepErrors.timings = "Please specify your custom available timing";
       }
     } else if (step === 5) {
-      if (!photoUrl && !photoName) stepErrors.photo = "Please upload profile photo";
-      if (!aadhaarUrl && !aadhaarName) stepErrors.aadhaar = "Please upload Aadhaar card (front & back)";
+      if (isUploadingPhoto || isUploadingAadhaar || isUploadingDegree || isUploadingResume) {
+        stepErrors.photo = stepErrors.photo || "";
+        stepErrors.aadhaar = stepErrors.aadhaar || "";
+        // Show a generic message if any upload is still in progress
+        if (isUploadingPhoto) stepErrors.photo = "Photo is still uploading, please wait...";
+        if (isUploadingAadhaar) stepErrors.aadhaar = "Aadhaar is still uploading, please wait...";
+        if (isUploadingDegree) stepErrors.degree = "Degree certificate is still uploading, please wait...";
+        if (isUploadingResume) stepErrors.resume = "Resume is still uploading, please wait...";
+      }
+      if (!photoUrl) stepErrors.photo = stepErrors.photo || "Please upload profile photo";
+      if (!aadhaarUrl) stepErrors.aadhaar = stepErrors.aadhaar || "Please upload Aadhaar card (front & back)";
     }
 
     setErrors(stepErrors);
@@ -278,8 +284,14 @@ export default function TutorRegistrationPage() {
     }
   };
 
+  const isAnyUploadInProgress = isUploadingPhoto || isUploadingAadhaar || isUploadingDegree || isUploadingResume;
+
   const handleSubmitRegistration = (e: React.FormEvent) => {
     e.preventDefault();
+    if (isAnyUploadInProgress) {
+      setErrorMessage("Please wait for all document uploads to complete before submitting.");
+      return;
+    }
     if (validateStep(5)) {
       setErrorMessage(null);
       submitMutation.mutate({

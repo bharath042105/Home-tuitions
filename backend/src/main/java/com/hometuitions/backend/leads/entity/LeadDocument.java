@@ -3,6 +3,8 @@ package com.hometuitions.backend.leads.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -32,8 +34,8 @@ public class LeadDocument {
     @Column(name = "document_type", length = 50)
     private String documentType;
 
-    @Lob
-    @Column(nullable = false)
+    @JdbcTypeCode(SqlTypes.BINARY)
+    @Column(name = "data", nullable = false)
     private byte[] data;
 
     @CreationTimestamp

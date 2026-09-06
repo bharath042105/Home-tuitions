@@ -45,6 +45,9 @@ public class LeadNotificationServiceImpl implements LeadNotificationService {
     @Value("${RESEND_FROM_EMAIL:${app.resend.from-email:Vidya Home Tuitions <onboarding@resend.dev>}}")
     private String resendFromEmail;
 
+    @Value("${app.admin-portal-url:${ADMIN_PORTAL_URL:https://admin.vidyahometuitions.com}}")
+    private String adminPortalUrl;
+
     public LeadNotificationServiceImpl(@Autowired(required = false) JavaMailSender mailSender) {
         this.mailSender = mailSender;
         this.httpClient = HttpClient.newBuilder()
@@ -85,7 +88,7 @@ public class LeadNotificationServiceImpl implements LeadNotificationService {
             plainText.append("• Timings & Frequency: ").append(timings).append(" | ").append(frequency).append("\n");
             plainText.append("• Budget: ").append(budget).append("\n");
             plainText.append("• Notes: ").append(remarks).append("\n\n");
-            plainText.append("Admin Portal: https://vidya-admin-iota.vercel.app/leads\n");
+            plainText.append("Admin Portal: ").append(getAdminPortalLeadsUrl()).append("\n");
 
             String html = "<div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 12px; overflow: hidden; background: #ffffff;\">"
                     + "<div style=\"background: linear-gradient(135deg, #1e40af, #3b82f6); padding: 20px; color: white; text-align: center;\">"
@@ -106,7 +109,7 @@ public class LeadNotificationServiceImpl implements LeadNotificationService {
                     + "<tr><td style=\"padding: 8px 0; color: #666;\">Requirements / Notes:</td><td style=\"padding: 8px 0;\">" + escape(remarks) + "</td></tr>"
                     + "</table>"
                     + "<div style=\"margin-top: 24px; text-align: center;\">"
-                    + "<a href=\"https://vidya-admin-iota.vercel.app/leads\" style=\"background: #1e40af; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;\">Open Admin Portal</a>"
+                    + "<a href=\"" + escape(getAdminPortalLeadsUrl()) + "\" style=\"background: #1e40af; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;\">Open Admin Portal</a>"
                     + "</div>"
                     + "</div>"
                     + "</div>";
@@ -172,7 +175,7 @@ public class LeadNotificationServiceImpl implements LeadNotificationService {
                 if (hasResume) plainText.append("• Resume / CV: ").append(resumeUrl).append("\n");
                 plainText.append("\n");
             }
-            plainText.append("Admin Portal: https://vidya-admin-iota.vercel.app/leads\n");
+            plainText.append("Admin Portal: ").append(getAdminPortalLeadsUrl()).append("\n");
 
             StringBuilder docsHtml = new StringBuilder();
             if (hasPhoto || hasAadhaar || hasDegree || hasResume) {
@@ -205,7 +208,7 @@ public class LeadNotificationServiceImpl implements LeadNotificationService {
                     + docsHtml.toString()
                     + "</table>"
                     + "<div style=\"margin-top: 24px; text-align: center;\">"
-                    + "<a href=\"https://vidya-admin-iota.vercel.app/leads\" style=\"background: #059669; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;\">Review in Admin Portal</a>"
+                    + "<a href=\"" + escape(getAdminPortalLeadsUrl()) + "\" style=\"background: #059669; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;\">Review in Admin Portal</a>"
                     + "</div>"
                     + "</div>"
                     + "</div>";
@@ -234,7 +237,7 @@ public class LeadNotificationServiceImpl implements LeadNotificationService {
             plainText.append("• Mobile: +91 ").append(phone).append("\n");
             plainText.append("• Email: ").append(email).append("\n");
             plainText.append("• Message:\n").append(msg).append("\n\n");
-            plainText.append("Admin Portal: https://vidya-admin-iota.vercel.app/leads\n");
+            plainText.append("Admin Portal: ").append(getAdminPortalLeadsUrl()).append("\n");
 
             String html = "<div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 12px; overflow: hidden; background: #ffffff;\">"
                     + "<div style=\"background: linear-gradient(135deg, #6366f1, #8b5cf6); padding: 20px; color: white; text-align: center;\">"
@@ -249,7 +252,7 @@ public class LeadNotificationServiceImpl implements LeadNotificationService {
                     + "<tr><td style=\"padding: 8px 0; color: #666; vertical-align: top;\">Message:</td><td style=\"padding: 8px 0; white-space: pre-wrap;\">" + escape(msg) + "</td></tr>"
                     + "</table>"
                     + "<div style=\"margin-top: 24px; text-align: center;\">"
-                    + "<a href=\"https://vidya-admin-iota.vercel.app/leads\" style=\"background: #6366f1; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;\">View in Admin Portal</a>"
+                    + "<a href=\"" + escape(getAdminPortalLeadsUrl()) + "\" style=\"background: #6366f1; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;\">View in Admin Portal</a>"
                     + "</div>"
                     + "</div>"
                     + "</div>";
@@ -386,6 +389,13 @@ public class LeadNotificationServiceImpl implements LeadNotificationService {
         } catch (Exception e) {
             log.error("❌ Failed to send email via Brevo API: {}", e.getMessage(), e);
         }
+    }
+
+    private String getAdminPortalLeadsUrl() {
+        String base = (adminPortalUrl != null && !adminPortalUrl.isBlank())
+                ? adminPortalUrl.trim().replaceAll("/+$", "")
+                : "https://admin.vidyahometuitions.com";
+        return base + "/leads";
     }
 
     private static String val(String s) {

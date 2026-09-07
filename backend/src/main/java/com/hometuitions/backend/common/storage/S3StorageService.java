@@ -70,13 +70,18 @@ public class S3StorageService implements StorageService {
             }
         }
 
+        Duration safeTtl = ttl;
+        if (safeTtl == null || safeTtl.toDays() > 7 || safeTtl.isNegative() || safeTtl.isZero()) {
+            safeTtl = Duration.ofDays(7);
+        }
+
         GetObjectRequest objectRequest = GetObjectRequest.builder()
                 .bucket(bucket)
                 .key(key)
                 .build();
 
         GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
-                .signatureDuration(ttl)
+                .signatureDuration(safeTtl)
                 .getObjectRequest(objectRequest)
                 .build();
 

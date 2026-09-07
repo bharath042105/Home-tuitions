@@ -29,7 +29,7 @@ import java.util.UUID;
 public class LeadController {
 
     private static final Duration UPLOAD_URL_TTL = Duration.ofMinutes(15);
-    private static final Duration DOWNLOAD_URL_TTL = Duration.ofDays(30);
+    private static final Duration DOWNLOAD_URL_TTL = Duration.ofDays(7);
 
     private final LeadService leadService;
     private final StorageService storageService;

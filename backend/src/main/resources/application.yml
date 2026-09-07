@@ -62,6 +62,10 @@ app:
   notification:
     admin-emails: ${APP_NOTIFICATION_ADMIN_EMAILS:${ADMIN_NOTIFICATION_EMAILS:vidyatutorspoint@gmail.com,sbharathreddy219@gmail.com,bharathreddypvt@gmail.com}}
     admin-phones: ${APP_NOTIFICATION_ADMIN_PHONES:${ADMIN_NOTIFICATION_PHONES:918074470640,916303619089,918143241349}}
+    whatsapp:
+      service-url: ${WHATSAPP_SERVICE_URL:}
+      api-secret: ${WHATSAPP_API_SECRET:vidya-wa-secret-2026}
+      send-applicant-confirmation: ${WHATSAPP_SEND_APPLICANT_CONFIRMATION:true}
 
 management:
   endpoints:

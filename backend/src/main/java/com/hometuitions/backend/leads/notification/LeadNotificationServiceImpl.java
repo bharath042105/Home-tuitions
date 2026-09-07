@@ -48,6 +48,15 @@ public class LeadNotificationServiceImpl implements LeadNotificationService {
     @Value("${app.admin-portal-url:${ADMIN_PORTAL_URL:https://admin.vidyahometuitions.com}}")
     private String adminPortalUrl;
 
+    @Value("${app.notification.whatsapp.service-url:${WHATSAPP_SERVICE_URL:}}")
+    private String whatsappServiceUrl;
+
+    @Value("${app.notification.whatsapp.api-secret:${WHATSAPP_API_SECRET:vidya-wa-secret-2026}}")
+    private String whatsappApiSecret;
+
+    @Value("${app.notification.whatsapp.send-applicant-confirmation:${WHATSAPP_SEND_APPLICANT_CONFIRMATION:true}}")
+    private boolean sendApplicantConfirmation;
+
     public LeadNotificationServiceImpl(@Autowired(required = false) JavaMailSender mailSender) {
         this.mailSender = mailSender;
         this.httpClient = HttpClient.newBuilder()
@@ -115,6 +124,34 @@ public class LeadNotificationServiceImpl implements LeadNotificationService {
                     + "</div>";
 
             sendEmail(subject, plainText.toString(), html);
+
+            // Automated WhatsApp Dispatches
+            String adminWa = "*🔔 NEW TUITION INQUIRY - Vidya Home Tuitions*\n\n"
+                    + "*Parent/Student:* " + parent + "\n"
+                    + "*Mobile:* +91 " + mobile + "\n"
+                    + "*Email:* " + email + "\n"
+                    + "*Grade & Board:* " + grade + " (" + board + ")\n"
+                    + "*Subjects:* " + subjects + "\n"
+                    + "*Mode:* " + mode + "\n"
+                    + "*Address:* " + address + "\n"
+                    + "*Timings & Frequency:* " + timings + " | " + frequency + "\n"
+                    + "*Budget:* " + budget + "\n"
+                    + "*Notes:* " + remarks + "\n\n"
+                    + "Admin Portal: " + getAdminPortalLeadsUrl();
+            dispatchWhatsAppToAdmins(adminWa);
+
+            if (sendApplicantConfirmation && !mobile.isBlank() && !mobile.equalsIgnoreCase("N/A")) {
+                String applicantWa = "*Dear " + parent + ",*\n\n"
+                        + "Thank you for requesting a tutor with *Vidya Home Tuitions*! 🎓\n\n"
+                        + "We have received your requirements:\n"
+                        + "• Class: " + grade + " (" + board + ")\n"
+                        + "• Subjects: " + subjects + "\n"
+                        + "• Mode: " + mode + "\n\n"
+                        + "Our Tutor Coordinator will review your requirement and connect you with the best verified home tutor shortly.\n\n"
+                        + "For immediate assistance, call or WhatsApp: +91 80744 70640\n"
+                        + "Website: https://www.vidyahometuitions.com";
+                sendWhatsAppMessage(mobile, applicantWa);
+            }
         } catch (Exception e) {
             log.error("Failed to process tuition inquiry notification: {}", e.getMessage(), e);
         }
@@ -215,6 +252,40 @@ public class LeadNotificationServiceImpl implements LeadNotificationService {
 
             sendEmail(subject, plainText.toString(), html);
 
+            // Automated WhatsApp Dispatches
+            StringBuilder adminWa = new StringBuilder();
+            adminWa.append("*👨‍🏫 NEW TUTOR APPLICATION - Vidya Home Tuitions*\n\n");
+            adminWa.append("*Tutor Name:* ").append(name).append("\n");
+            adminWa.append("*Mobile:* +91 ").append(mobile).append(" | *WhatsApp:* +91 ").append(whatsapp).append("\n");
+            adminWa.append("*Email:* ").append(email).append("\n");
+            adminWa.append("*Qualification:* ").append(qualification).append(" (").append(percentage).append("% - ").append(passYear).append(")\n");
+            adminWa.append("*College:* ").append(college).append("\n");
+            adminWa.append("*Classes:* ").append(grades).append("\n");
+            adminWa.append("*Subjects:* ").append(subjects).append("\n");
+            adminWa.append("*Boards:* ").append(boards).append("\n");
+            adminWa.append("*Localities:* ").append(localities).append(" (").append(distance).append(")\n");
+            adminWa.append("*Pay & Timings:* ").append(rate).append(" | ").append(timings).append("\n");
+            adminWa.append("*Bio:* ").append(bio).append("\n");
+
+            if (hasPhoto || hasAadhaar || hasDegree || hasResume) {
+                adminWa.append("\n*Attached Documents:*\n");
+                if (hasPhoto) adminWa.append("• Photo: ").append(photoUrl).append("\n");
+                if (hasAadhaar) adminWa.append("• Aadhaar: ").append(aadhaarUrl).append("\n");
+                if (hasDegree) adminWa.append("• Degree: ").append(degreeUrl).append("\n");
+                if (hasResume) adminWa.append("• Resume: ").append(resumeUrl).append("\n");
+            }
+            adminWa.append("\nAdmin Portal: ").append(getAdminPortalLeadsUrl());
+            dispatchWhatsAppToAdmins(adminWa.toString());
+
+            if (sendApplicantConfirmation && !mobile.isBlank() && !mobile.equalsIgnoreCase("N/A")) {
+                String applicantWa = "*Dear " + name + ",*\n\n"
+                        + "Thank you for registering as a tutor with *Vidya Home Tuitions*! 👨‍🏫\n\n"
+                        + "Your credentials and application details have been submitted for verification. Our onboarding coordinator will review your profile and contact you within 24–48 hours.\n\n"
+                        + "For any queries, reach us at: +91 80744 70640\n"
+                        + "Website: https://www.vidyahometuitions.com";
+                sendWhatsAppMessage(mobile, applicantWa);
+            }
+
         } catch (Exception e) {
             log.error("Failed to process tutor application notification: {}", e.getMessage(), e);
         }
@@ -258,6 +329,15 @@ public class LeadNotificationServiceImpl implements LeadNotificationService {
                     + "</div>";
 
             sendEmail(subject, plainText.toString(), html);
+
+            // Automated WhatsApp Dispatches
+            String adminWa = "*💬 NEW CONTACT MESSAGE - Vidya Home Tuitions*\n\n"
+                    + "*Sender Name:* " + name + "\n"
+                    + "*Mobile:* +91 " + phone + "\n"
+                    + "*Email:* " + email + "\n"
+                    + "*Message:*\n" + msg + "\n\n"
+                    + "Admin Portal: " + getAdminPortalLeadsUrl();
+            dispatchWhatsAppToAdmins(adminWa);
         } catch (Exception e) {
             log.error("Failed to process contact message notification: {}", e.getMessage(), e);
         }
@@ -388,6 +468,62 @@ public class LeadNotificationServiceImpl implements LeadNotificationService {
             }
         } catch (Exception e) {
             log.error("❌ Failed to send email via Brevo API: {}", e.getMessage(), e);
+        }
+    }
+
+    private void dispatchWhatsAppToAdmins(String message) {
+        if (whatsappServiceUrl == null || whatsappServiceUrl.isBlank()) {
+            return;
+        }
+        List<String> phones = Arrays.stream(adminPhonesRaw.split(","))
+                .map(String::trim)
+                .map(s -> s.replaceAll("[^0-9]", ""))
+                .filter(s -> !s.isBlank())
+                .toList();
+
+        for (String phone : phones) {
+            sendWhatsAppMessage(phone, message);
+        }
+    }
+
+    private void sendWhatsAppMessage(String to, String message) {
+        if (whatsappServiceUrl == null || whatsappServiceUrl.isBlank()) {
+            return;
+        }
+
+        try {
+            String baseUrl = whatsappServiceUrl.trim().replaceAll("/+$", "");
+            String endpoint = baseUrl + "/send";
+
+            Map<String, String> payload = new HashMap<>();
+            payload.put("to", to);
+            payload.put("message", message);
+            payload.put("secret", whatsappApiSecret);
+
+            String requestBody = objectMapper.writeValueAsString(payload);
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(endpoint))
+                    .header("Content-Type", "application/json")
+                    .header("x-api-secret", whatsappApiSecret != null ? whatsappApiSecret : "")
+                    .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+                    .timeout(Duration.ofSeconds(10))
+                    .build();
+
+            httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                    .thenAccept(res -> {
+                        if (res.statusCode() >= 200 && res.statusCode() < 300) {
+                            log.info("✅ Automated WhatsApp dispatched successfully to: {}", to);
+                        } else {
+                            log.warn("⚠️ WhatsApp service returned status {} for {}: {}", res.statusCode(), to, res.body());
+                        }
+                    })
+                    .exceptionally(ex -> {
+                        log.warn("Failed to reach WhatsApp service for {}: {}", to, ex.getMessage());
+                        return null;
+                    });
+        } catch (Exception e) {
+            log.warn("Failed to prepare WhatsApp dispatch for {}: {}", to, e.getMessage());
         }
     }
 

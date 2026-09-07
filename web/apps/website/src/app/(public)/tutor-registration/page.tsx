@@ -287,7 +287,6 @@ export default function TutorRegistrationPage() {
   const handleAutoFillAndJumpToDocs = () => {
     setName("Test Tutor (Sample)");
     setFatherName("Sample Father");
-    setGender("Male");
     setQualification("B.Tech / Engineering");
     setCollege("JNTU Hyderabad");
     setPercentage("85");

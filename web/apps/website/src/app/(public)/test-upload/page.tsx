@@ -32,12 +32,11 @@ export default function TestUploadPage() {
     setResult(null);
 
     try {
-      const response = await leadsApi.uploadDocument(file, docType);
-      const isR2 = response.publicUrl ? response.publicUrl.includes("r2.cloudflarestorage.com") || response.key.startsWith("tutor-applications/") : false;
+      const publicUrl = await leadsApi.uploadDocumentFile(file, docType);
+      const isR2 = publicUrl ? publicUrl.includes("r2.cloudflarestorage.com") || publicUrl.includes("tutor-applications") : false;
 
       setResult({
-        key: response.key,
-        publicUrl: response.publicUrl,
+        publicUrl: publicUrl,
         isR2: isR2,
       });
     } catch (err: any) {
@@ -173,10 +172,12 @@ export default function TestUploadPage() {
                     </div>
 
                     <div className="space-y-1 text-xs font-mono bg-white/60 dark:bg-black/30 p-3 rounded-xl border border-emerald-500/20 break-all">
-                      <div>
-                        <span className="font-bold text-neutral-700 dark:text-neutral-300">Storage Key: </span>
-                        {result.key}
-                      </div>
+                      {result.key && (
+                        <div>
+                          <span className="font-bold text-neutral-700 dark:text-neutral-300">Storage Key: </span>
+                          {result.key}
+                        </div>
+                      )}
                       <div>
                         <span className="font-bold text-neutral-700 dark:text-neutral-300">Storage Target: </span>
                         {result.isR2 ? "Cloudflare R2 Bucket (hometuitions-documents)" : "Database Document Storage"}

@@ -246,6 +246,11 @@ app.get("/qr", (req, res) => {
   `);
 });
 
+// Health check for Render
+app.get(["/healthz", "/health"], (req, res) => {
+  res.status(200).json({ ok: true, status: connectionStatus });
+});
+
 // JSON Status endpoint
 app.get("/status", (req, res) => {
   res.json({

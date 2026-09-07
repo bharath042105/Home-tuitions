@@ -36,7 +36,7 @@ public class LeadNotificationServiceImpl implements LeadNotificationService {
     @Value("${app.notification.admin-phones:918074470640,916303619089,918143241349}")
     private String adminPhonesRaw;
 
-    @Value("${spring.mail.username:bharathreddypvt@gmail.com}")
+    @Value("${spring.mail.username:vidyatutorspoint@gmail.com}")
     private String mailFrom;
 
     @Value("${RESEND_API_KEY:${app.resend.api-key:}}")
@@ -376,7 +376,7 @@ public class LeadNotificationServiceImpl implements LeadNotificationService {
         }
 
         // FALLBACK: Standard JavaMailSender (SMTP)
-        String fromEmail = (mailFrom != null ? mailFrom.trim().replaceAll("[\"']", "") : "bharathreddypvt@gmail.com");
+        String fromEmail = (mailFrom != null ? mailFrom.trim().replaceAll("[\"']", "") : "vidyatutorspoint@gmail.com");
         log.info("📧 Dispatching lead notification email via SMTP from [{}] to recipients: {}. Subject: {}", fromEmail, recipients, subject);
 
         if (mailSender == null) {

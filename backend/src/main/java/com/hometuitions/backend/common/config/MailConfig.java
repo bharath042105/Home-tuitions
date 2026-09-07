@@ -22,7 +22,7 @@ public class MailConfig {
     @Value("${spring.mail.port:587}")
     private int port;
 
-    @Value("${spring.mail.username:bharathreddypvt@gmail.com}")
+    @Value("${spring.mail.username:vidyatutorspoint@gmail.com}")
     private String username;
 
     @Value("${spring.mail.password:}")

@@ -217,7 +217,7 @@ function TuitionInquiriesTab() {
                   variant="outlined"
                   color="primary"
                   component="a"
-                  href={`mailto:vidyatutorspoint@gmail.com,sbharathreddy219@gmail.com?subject=${encodeURIComponent(`Inquiry Lead: ${selectedInquiry.parentName} - ${selectedInquiry.grade}`)}&body=${encodeURIComponent(getWhatsappText(selectedInquiry).replace(/\*/g, ""))}`}
+                  href={`mailto:vidyatutorspoint@gmail.com?subject=${encodeURIComponent(`Inquiry Lead: ${selectedInquiry.parentName} - ${selectedInquiry.grade}`)}&body=${encodeURIComponent(getWhatsappText(selectedInquiry).replace(/\*/g, ""))}`}
                 >
                   Email to Admins
                 </Button>
@@ -547,7 +547,7 @@ function TutorApplicationsTab() {
                   variant="outlined"
                   color="primary"
                   component="a"
-                  href={`mailto:vidyatutorspoint@gmail.com,sbharathreddy219@gmail.com?subject=${encodeURIComponent(`Tutor Application: ${selectedTutor.name} - ${selectedTutor.qualification}`)}&body=${encodeURIComponent(getTutorWhatsappText(selectedTutor).replace(/\*/g, ""))}`}
+                  href={`mailto:vidyatutorspoint@gmail.com?subject=${encodeURIComponent(`Tutor Application: ${selectedTutor.name} - ${selectedTutor.qualification}`)}&body=${encodeURIComponent(getTutorWhatsappText(selectedTutor).replace(/\*/g, ""))}`}
                 >
                   Email to Admins
                 </Button>
@@ -686,7 +686,7 @@ function ContactMessagesTab() {
                   variant="outlined"
                   color="primary"
                   component="a"
-                  href={`mailto:vidyatutorspoint@gmail.com,sbharathreddy219@gmail.com?subject=${encodeURIComponent(`Contact Inquiry: ${selectedMessage.name}`)}&body=${encodeURIComponent(getContactWhatsappText(selectedMessage).replace(/\*/g, ""))}`}
+                  href={`mailto:vidyatutorspoint@gmail.com?subject=${encodeURIComponent(`Contact Inquiry: ${selectedMessage.name}`)}&body=${encodeURIComponent(getContactWhatsappText(selectedMessage).replace(/\*/g, ""))}`}
                 >
                   Email to Admins
                 </Button>

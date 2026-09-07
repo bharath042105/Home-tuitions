@@ -27,7 +27,7 @@ public class S3StorageService implements StorageService {
 
     public S3StorageService(S3Presigner presigner,
                             S3Client s3Client,
-                            @Value("${app.s3.bucket:${R2_BUCKET:hometuitions-dev-documents}}") String bucket,
+                            @Value("${app.s3.bucket:${S3_BUCKET:${R2_BUCKET:hometuitions-documents}}}") String bucket,
                             @Value("${app.s3.public-url-base:${R2_PUBLIC_URL_BASE:}}") String publicUrlBase) {
         this.presigner = presigner;
         this.s3Client = s3Client;

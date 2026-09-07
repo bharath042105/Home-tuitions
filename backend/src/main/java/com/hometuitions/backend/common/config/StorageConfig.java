@@ -31,7 +31,7 @@ public class StorageConfig {
 
     @Bean
     public S3Presigner s3Presigner() {
-        String effectiveRegion = (region == null || region.isBlank() || "auto".equalsIgnoreCase(region)) ? "us-east-1" : region;
+        String effectiveRegion = (region == null || region.isBlank()) ? "auto" : region.trim();
         var builder = S3Presigner.builder().region(Region.of(effectiveRegion));
 
         if (accessKey != null && !accessKey.isBlank() && secretKey != null && !secretKey.isBlank()) {
@@ -50,7 +50,7 @@ public class StorageConfig {
 
     @Bean
     public S3Client s3Client() {
-        String effectiveRegion = (region == null || region.isBlank() || "auto".equalsIgnoreCase(region)) ? "us-east-1" : region;
+        String effectiveRegion = (region == null || region.isBlank()) ? "auto" : region.trim();
         S3ClientBuilder builder = S3Client.builder().region(Region.of(effectiveRegion));
 
         if (accessKey != null && !accessKey.isBlank() && secretKey != null && !secretKey.isBlank()) {

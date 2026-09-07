@@ -81,7 +81,8 @@ public class LeadController {
     public ResponseEntity<LeadUploadUrlResponse> uploadDocumentFile(
             @RequestParam("file") MultipartFile file,
             @RequestParam(value = "documentType", required = false) String documentType,
-            HttpServletRequest request) {
+            HttpServletRequest request,
+            jakarta.servlet.http.HttpServletResponse httpResponse) {
         try {
             if (file.isEmpty()) {
                 log.warn("Upload rejected: empty file received");
@@ -103,9 +104,15 @@ public class LeadController {
                     s3StorageService.uploadBytes(key, contentType, file.getBytes());
                     String publicUrl = s3StorageService.generateDownloadUrl(key, DOWNLOAD_URL_TTL).toString();
                     log.info("Uploaded lead document to Cloudflare R2/S3 key={} -> {}", key, publicUrl);
+                    if (httpResponse != null) {
+                        httpResponse.setHeader("X-Storage-Engine", "Cloudflare-R2");
+                    }
                     return ResponseEntity.ok(new LeadUploadUrlResponse(null, key, publicUrl));
                 } catch (Exception e) {
-                    log.warn("Cloudflare R2/S3 upload failed, falling back to database document storage: {}", e.getMessage());
+                    log.warn("Cloudflare R2/S3 upload failed, falling back to database document storage: {}", e.getMessage(), e);
+                    if (httpResponse != null) {
+                        httpResponse.setHeader("X-Storage-Fallback-Reason", e.getClass().getSimpleName() + ": " + e.getMessage());
+                    }
                 }
             }
 

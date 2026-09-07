@@ -284,6 +284,33 @@ export default function TutorRegistrationPage() {
     }
   };
 
+  const handleAutoFillAndJumpToDocs = () => {
+    setName("Test Tutor (Sample)");
+    setFatherName("Sample Father");
+    setGender("Male");
+    setQualification("B.Tech / Engineering");
+    setCollege("JNTU Hyderabad");
+    setPercentage("85");
+    setPassYear("2023");
+    setLocalities("Madhapur, Hitech City, Gachibowli");
+    setSelectedGrades(["Class 9 - 10 (Secondary / Board)", "Class 11 - 12 (Intermediate / +2)"]);
+    setSelectedBoards(["CBSE", "SSC (State Board)"]);
+    setSelectedSubjects(["Mathematics", "Physics"]);
+    setMedium("English");
+    setMode("BOTH");
+    setMobile("8143176469");
+    setWhatsapp("8143176469");
+    setEmail("vidyatutorspoint@gmail.com");
+    setOccupation("FULL_TIME_TUTOR");
+    setExperience("1-3 years");
+    setExpectedRate("5000/month");
+    setTimingOption("Evening (4 PM - 8 PM)");
+    setBio("Passionate mathematics & physics tutor for high school students.");
+    setCompletedSteps([0, 1, 2, 3, 4]);
+    setErrors({});
+    setActiveStep(5);
+  };
+
   const isAnyUploadInProgress = isUploadingPhoto || isUploadingAadhaar || isUploadingDegree || isUploadingResume;
 
   const handleSubmitRegistration = (e: React.FormEvent) => {
@@ -464,6 +491,24 @@ export default function TutorRegistrationPage() {
             <p className="text-sm text-neutral-550 dark:text-neutral-400 mt-2">
               Join Hyderabad’s top network of verified home & online educators. Fill your profile to start receiving direct tuition inquiries.
             </p>
+            {/* Quick Test Mode Fast-Track */}
+            <div className="flex flex-wrap items-center gap-3 mt-4">
+              <button
+                type="button"
+                onClick={handleAutoFillAndJumpToDocs}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 text-xs font-bold transition-all shadow-sm active:scale-95"
+              >
+                <Sparkles size={14} className="text-amber-500" />
+                ⚡ Fast-Track Testing: Auto-Fill & Jump to Step 6 (Upload Documents)
+              </button>
+              <Link
+                href="/test-upload"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-500/30 text-xs font-bold transition-all shadow-sm active:scale-95"
+              >
+                <Upload size={14} className="text-blue-500" />
+                🚀 Standalone 1-Click Upload Tester
+              </Link>
+            </div>
           </div>
 
           {/* Stepper Accordion List */}

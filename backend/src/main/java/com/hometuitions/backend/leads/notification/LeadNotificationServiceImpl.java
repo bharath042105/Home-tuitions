@@ -405,6 +405,7 @@ public class LeadNotificationServiceImpl implements LeadNotificationService {
             Map<String, Object> payload = new HashMap<>();
             payload.put("from", resendFromEmail != null && !resendFromEmail.isBlank() ? resendFromEmail : "Vidya Home Tuitions <onboarding@resend.dev>");
             payload.put("to", List.of(recipient));
+            payload.put("reply_to", "vidyatutorspoint@gmail.com");
             payload.put("subject", subject);
             payload.put("html", html);
             payload.put("text", plainText);

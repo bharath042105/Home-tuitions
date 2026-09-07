@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
@@ -508,7 +509,7 @@ public class LeadNotificationServiceImpl implements LeadNotificationService {
                     .header("Content-Type", "application/json")
                     .header("x-api-secret", whatsappApiSecret != null ? whatsappApiSecret : "")
                     .POST(HttpRequest.BodyPublishers.ofString(requestBody))
-                    .timeout(Duration.ofSeconds(10))
+                    .timeout(Duration.ofSeconds(25))
                     .build();
 
             httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
@@ -516,7 +517,13 @@ public class LeadNotificationServiceImpl implements LeadNotificationService {
                         if (res.statusCode() >= 200 && res.statusCode() < 300) {
                             log.info("✅ Automated WhatsApp dispatched successfully to: {}", to);
                         } else {
-                            log.warn("⚠️ WhatsApp service returned status {} for {}: {}", res.statusCode(), to, res.body());
+                            String errorSummary = res.body();
+                            if (errorSummary != null && (errorSummary.contains("<html") || errorSummary.contains("<HTML>"))) {
+                                errorSummary = "Render 502/Gateway Timeout (Service waking up or temporarily unavailable)";
+                            } else if (errorSummary != null && errorSummary.length() > 200) {
+                                errorSummary = errorSummary.substring(0, 200) + "...";
+                            }
+                            log.warn("⚠️ WhatsApp service returned status {} for {}: {}", res.statusCode(), to, errorSummary);
                         }
                     })
                     .exceptionally(ex -> {
@@ -525,6 +532,32 @@ public class LeadNotificationServiceImpl implements LeadNotificationService {
                     });
         } catch (Exception e) {
             log.warn("Failed to prepare WhatsApp dispatch for {}: {}", to, e.getMessage());
+        }
+    }
+
+    /**
+     * Pings the WhatsApp service every 10 minutes to prevent Render's free tier from spinning it down.
+     * Render puts free services to sleep after 15 minutes of inactivity; this keeps it continuously warm.
+     */
+    @Scheduled(fixedDelay = 600000, initialDelay = 30000)
+    public void keepWhatsAppServiceAlive() {
+        if (whatsappServiceUrl == null || whatsappServiceUrl.isBlank()) {
+            return;
+        }
+        try {
+            String pingUrl = whatsappServiceUrl.trim().replaceAll("/+$", "") + "/healthz";
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(pingUrl))
+                    .GET()
+                    .timeout(Duration.ofSeconds(20))
+                    .build();
+            httpClient.sendAsync(request, HttpResponse.BodyHandlers.discarding())
+                    .thenAccept(res -> log.debug("WhatsApp service keep-alive ping status: {}", res.statusCode()))
+                    .exceptionally(ex -> {
+                        log.debug("WhatsApp keep-alive ping failed: {}", ex.getMessage());
+                        return null;
+                    });
+        } catch (Exception ignored) {
         }
     }
 

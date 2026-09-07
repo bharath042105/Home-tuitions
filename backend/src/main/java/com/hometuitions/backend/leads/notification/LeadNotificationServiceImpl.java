@@ -30,7 +30,7 @@ public class LeadNotificationServiceImpl implements LeadNotificationService {
     private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
 
-    @Value("${app.notification.admin-emails:vidyatutorspoint@gmail.com,bharathreddypvt@gmail.com}")
+    @Value("${app.notification.admin-emails:vidyatutorspoint@gmail.com}")
     private String adminEmailsRaw;
 
     @Value("${app.notification.admin-phones:918074470640,916303619089,918143241349}")

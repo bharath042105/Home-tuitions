@@ -60,7 +60,7 @@ app:
   payment:
     commission-rate: ${PLATFORM_COMMISSION_RATE:0.15}
   notification:
-    admin-emails: ${APP_NOTIFICATION_ADMIN_EMAILS:${ADMIN_NOTIFICATION_EMAILS:vidyatutorspoint@gmail.com,bharathreddypvt@gmail.com}}
+    admin-emails: ${APP_NOTIFICATION_ADMIN_EMAILS:${ADMIN_NOTIFICATION_EMAILS:vidyatutorspoint@gmail.com}}
     admin-phones: ${APP_NOTIFICATION_ADMIN_PHONES:${ADMIN_NOTIFICATION_PHONES:918074470640,916303619089,918143241349}}
     whatsapp:
       service-url: ${WHATSAPP_SERVICE_URL:}
